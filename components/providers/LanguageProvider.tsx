@@ -1,0 +1,172 @@
+"use client";
+
+import React, { createContext, useContext, useState, ReactNode } from "react";
+
+type Language = "en" | "bn";
+
+const translations: Record<Language, any> = {
+  en: {
+    langBtnText: "বাংলা",
+    formSubtitle: "Single Player Registration",
+    step1Label: "Step 1 of 2",
+    personalDetailsTitle: "Personal Details",
+    labelFullName: "Full Name",
+    placeholderFullName: "e.g. Rohit Sharma",
+    labelAge: "Age",
+    labelMobile: "Mobile Number",
+    placeholderMobile: "10-digit mobile number",
+    labelEmailMain: "Email Address",
+    labelEmailOpt: "(Optional)",
+    placeholderEmail: "For payment receipt",
+    playerStatsTitle: "Player Stats",
+    labelPrimaryRole: "Primary Role",
+    roleBatsman: "Batsman",
+    roleBowler: "Bowler",
+    roleAllRounder: "All-Rounder",
+    roleKeeper: "Keeper",
+    labelBattingStyle: "Batting Style",
+    batRight: "Right Hand Bat",
+    batLeft: "Left Hand Bat",
+    labelBowlingStyle: "Bowling Style",
+    bowlNone: "None / Pure Batsman",
+    bowlRightPace: "Right Arm Pace",
+    bowlRightSpin: "Right Arm Spin",
+    bowlLeftPace: "Left Arm Pace",
+    bowlLeftSpin: "Left Arm Spin",
+    rulesTitle: "Tournament Rules",
+    rule1: "Any misbehavior, trouble-making, or rudeness during the tournament may result in player suspension.",
+    rule2: "Bowlers have a speed limit and must bowl standing within the designated box line.",
+    rule3: "If any player has a problem, they should inform the captain. The captain will then inform the tournament committee.",
+    rule4: "If any player sledges another player or committee member, they will be <strong>banned for 2 matches</strong>.",
+    rule5: "Players must reach the ground on time; if not, they will be <strong>disqualified</strong> from the tournament.",
+    consentLabel: "I have read and agree to follow these rules.",
+    infoLinkText: "Tournament Format & Prizes",
+    infoLinkDesc: "Explore match rules, format and rewards.",
+    infoBtnView: "View Details",
+    infoPageTitle: "Format & Prizes",
+    policyLinkText: "Auction Rules",
+    policyLinkDesc: "Read the official auction bidding rules.",
+    policyBtnView: "Auction Rules",
+    policyPageTitle: "Auction Rules",
+    btnBackToReg: "Back",
+    btnBackToRegFromInfo: "Back to Registration",
+    photoTitle: "Player Photo",
+    photoLabel: "Upload Profile Picture",
+    photoHelp: "Max size 2MB. Formats: JPG, PNG.",
+    btnBack1: "Back",
+    btnContinue: "Continue",
+    step2Title: "Summary & Payment",
+    step2Desc: "Please review your details before proceeding.",
+    sumAgeLabel: "Age",
+    sumBatDetailsLabel: "Batting Details",
+    jerseyTitle: "JERSEY",
+    jerseySeason: "Season 2 Jersey",
+    jerseyNumLabel: "Jersey Number",
+    jerseySizeLabel: "Jersey Size",
+    feeLabel: "Registration Fee",
+    btnBack2: "Back",
+    btnPay: "Pay ₹50 & Register",
+    securePayText: "Secure payment powered by Razorpay",
+    helpTitle: "Need help with registration?",
+    btnChat: "Chat with Support"
+  },
+  bn: {
+    langBtnText: "English",
+    formSubtitle: "সিঙ্গেল প্লেয়ার রেজিস্ট্রেশন",
+    step1Label: "ধাপ ১ / ২",
+    personalDetailsTitle: "ব্যক্তিগত বিবরণ",
+    labelFullName: "পুরো নাম",
+    placeholderFullName: "যেমন: রোহিত শর্মা",
+    labelAge: "বয়স",
+    labelMobile: "মোবাইল নম্বর",
+    placeholderMobile: "১০-সংখ্যার মোবাইল নম্বর",
+    labelEmailMain: "ইমেইল ঠিকানা",
+    labelEmailOpt: "(ঐচ্ছিক)",
+    placeholderEmail: "পেমেন্ট রসিদের জন্য",
+    playerStatsTitle: "খেলোয়াড়ের পরিসংখ্যান",
+    labelPrimaryRole: "প্রাথমিক ভূমিকা",
+    roleBatsman: "ব্যাটসম্যান",
+    roleBowler: "বোলার",
+    roleAllRounder: "অলরাউন্ডার",
+    roleKeeper: "কিপার",
+    labelBattingStyle: "ব্যাটিং স্টাইল",
+    batRight: "ডানহাতি ব্যাট",
+    batLeft: "বাঁহাতি ব্যাট",
+    labelBowlingStyle: "বোলিং স্টাইল",
+    bowlNone: "নেই / পিওর ব্যাটসম্যান",
+    bowlRightPace: "ডানহাতি পেস",
+    bowlRightSpin: "ডানহাতি স্পিন",
+    bowlLeftPace: "বাঁহাতি পেস",
+    bowlLeftSpin: "বাঁহাতি স্পিন",
+    rulesTitle: "টুর্নামেন্টের নিয়মাবলী",
+    rule1: "Tournament চলাকালীন খারাপ আচরণ, ঝামেলা বা অসভ্যতা করলে Player Suspend হতে পারে।",
+    rule2: "বোলারদের একটি নির্দিষ্ট গতিসীমা থাকবে এবং তাদের নির্দিষ্ট বক্স লাইনের মধ্যে দাঁড়িয়ে বল করতে হবে।",
+    rule3: "যদি কোনো খেলোয়াড়ের কোনো সমস্যা থাকে, তবে তাকে অধিনায়ককে (Captain) জানাতে হবে। অধিনায়ক তারপর টুর্নামেন্ট কমিটিকে জানাবেন।",
+    rule4: "যদি কোনো খেলোয়াড় অন্য কোনো খেলোয়াড় বা কমিটির সদস্যকে স্লেজিং (Sledging) বা অপমান করে, তবে তাকে <strong>২ ম্যাচের জন্য নিষিদ্ধ (ban)</strong> করা হবে।",
+    rule5: "খেলোয়াড়দের ঠিক সময়ে মাঠে পৌঁছাতে হবে; অন্যথায় তাদের টুর্নামেন্ট থেকে <strong>বাতিল</strong> করা হবে।",
+    consentLabel: "আমি এই নিয়মগুলি পড়েছি এবং মেনে চলতে রাজি আছি।",
+    infoLinkText: "টুর্নামেন্ট ফরম্যাট ও পুরস্কার",
+    infoLinkDesc: "ম্যাচের নিয়ম, ফরম্যাট এবং পুরস্কার সম্পর্কে জানুন।",
+    infoBtnView: "বিস্তারিত দেখুন",
+    infoPageTitle: "ফরম্যাট ও পুরস্কার",
+    policyLinkText: "নিলামের নিয়মাবলী",
+    policyLinkDesc: "অফিসিয়াল নিলামের বিডিং নিয়মাবলী পড়ুন।",
+    policyBtnView: "নিলামের নিয়মাবলী",
+    policyPageTitle: "নিলামের নিয়মাবলী",
+    btnBackToReg: "পেছনে",
+    btnBackToRegFromInfo: "রেজিস্ট্রেশনে ফিরে যান",
+    photoTitle: "খেলোয়াড়ের ছবি",
+    photoLabel: "প্রোফাইল ছবি আপলোড করুন",
+    photoHelp: "সর্বোচ্চ সাইজ ২MB। ফরম্যাট: JPG, PNG।",
+    btnBack1: "পেছনে",
+    btnContinue: "চালিয়ে যান",
+    step2Title: "সারাংশ এবং পেমেন্ট",
+    step2Desc: "এগিয়ে যাওয়ার আগে আপনার বিবরণ পর্যালোচনা করুন।",
+    sumAgeLabel: "বয়স",
+    sumBatDetailsLabel: "ব্যাটিং বিবরণ",
+    jerseyTitle: "জার্সি",
+    jerseySeason: "সিজন ২ জার্সি",
+    jerseyNumLabel: "জার্সি নম্বর",
+    jerseySizeLabel: "জার্সির সাইজ",
+    feeLabel: "রেজিস্ট্রেশন ফি",
+    btnBack2: "পেছনে",
+    btnPay: "৫০ টাকা দিন এবং রেজিস্টার করুন",
+    securePayText: "রেজারপে দ্বারা সুরক্ষিত পেমেন্ট",
+    helpTitle: "রেজিস্ট্রেশনে সাহায্য লাগবে?",
+    btnChat: "সাপোর্টের সাথে কথা বলুন"
+  }
+};
+
+type LanguageContextType = {
+  currentLang: Language;
+  toggleLanguage: () => void;
+  t: (key: keyof typeof translations.en) => string;
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [currentLang, setCurrentLang] = useState<Language>("en");
+
+  const toggleLanguage = () => {
+    setCurrentLang((prev: Language) => (prev === "en" ? "bn" : "en"));
+  };
+
+  const t = (key: keyof typeof translations.en) => {
+    return (translations as any)[currentLang][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ currentLang, toggleLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
+};
