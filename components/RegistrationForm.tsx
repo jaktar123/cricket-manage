@@ -6,6 +6,7 @@ import { Step1Personal } from "./Step1Personal";
 import { Step2Payment } from "./Step2Payment";
 import { PolicyModal } from "./PolicyModal";
 import { InfoModal } from "./InfoModal";
+import { SuccessScreen } from "./SuccessScreen";
 import { RegistrationData } from "@/lib/types";
 
 type Props = {
@@ -17,6 +18,8 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
   const [showPolicy, setShowPolicy] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentId, setPaymentId] = useState("");
 
   const [formData, setFormData] = useState<RegistrationData>({
     fullName: "",
@@ -25,7 +28,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
     email: "",
     role: "Batsman",
     battingStyle: "Right Hand",
-    bowlingStyle: "None",
+    bowlingStyle: "Right Arm Pace",
     photoUrl: "",
     jerseyNumber: "10",
     jerseySize: "L",
@@ -63,7 +66,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
       // 2. Initialize Razorpay Options
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_YOUR_KEY", // Fallback for dev
-        amount: 5000,
+        amount: 10000,
         currency: "INR",
         name: "JUGORE TRIPLE L",
         description: "Registration Fee - Season 2",
@@ -85,8 +88,9 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
             if (regError) throw new Error(regError);
 
             if (success) {
-              alert(`Registration Successful for ${formData.fullName}! Welcome to the league.`);
-              onBackToIntro();
+              setPaymentId(response.razorpay_payment_id);
+              setIsSuccess(true);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }
           } catch (error: any) {
             alert("Error verifying payment: " + error.message);
@@ -111,6 +115,10 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
       setIsSubmitting(false);
     }
   };
+
+  if (isSuccess) {
+    return <SuccessScreen formData={formData} paymentId={paymentId} onClose={onBackToIntro} />;
+  }
 
   return (
     <div id="registrationContainer" className="max-w-3xl mx-auto py-10 animate-scramble-pop px-4">

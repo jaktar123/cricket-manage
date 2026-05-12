@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
   try {
@@ -23,6 +23,8 @@ export async function POST(req: Request) {
     if (!isSignatureValid) {
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
+
+    const supabase = createClient();
 
     // Save to Supabase
     const { data, error } = await supabase

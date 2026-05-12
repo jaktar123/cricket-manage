@@ -98,7 +98,39 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
             <span className="relative text-xl">রেজিস্ট্রেশন করুন</span>
           </button>
 
-          <p className="mt-4 text-slate-400 text-xs">Join the ultimate cricket showdown!</p>
+          <p className="mt-4 text-slate-400 text-xs uppercase tracking-widest font-bold">Join the ultimate cricket showdown!</p>
+          
+          {/* Support Contacts */}
+          <div className="mt-8 pt-8 border-t border-white/10 w-full max-w-xl mx-auto">
+            <p className="text-blue-300/60 text-[10px] mb-6 uppercase tracking-[0.3em] font-black">Need Help with Registration? Contact Us</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <a 
+                href="tel:+919907434605" 
+                className="flex items-center justify-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-2xl transition-all group backdrop-blur-sm"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                  <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
+                </div>
+                <div className="text-left">
+                  <p className="text-[11px] text-yellow-500 uppercase font-black tracking-[0.2em] mb-0.5">JAMIL</p>
+                  <p className="text-white font-black tracking-widest text-sm">9907434605</p>
+                </div>
+              </a>
+              
+              <a 
+                href="tel:+916294979597" 
+                className="flex items-center justify-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-2xl transition-all group backdrop-blur-sm"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                  <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
+                </div>
+                <div className="text-left">
+                  <p className="text-[11px] text-yellow-500 uppercase font-black tracking-[0.2em] mb-0.5">AYATULLAH</p>
+                  <p className="text-white font-black tracking-widest text-sm">6294979597</p>
+                </div>
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Quotes */}

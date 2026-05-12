@@ -138,7 +138,7 @@ export const Step2Payment = ({ formData, setFormData, onBack, onSubmit, isSubmit
           </div>
           <span className="font-medium">{t("feeLabel")}</span>
         </div>
-        <span className="text-2xl font-bold text-blue-700">₹50.00</span>
+        <span className="text-2xl font-bold text-blue-700">₹100.00</span>
       </div>
 
       {/* Actions */}
@@ -181,7 +181,7 @@ export const Step2Payment = ({ formData, setFormData, onBack, onSubmit, isSubmit
           {t("helpTitle")} <span className="font-normal text-slate-400">(রেজিস্ট্রেশনে সাহায্য লাগবে?)</span>
         </p>
         <a
-          href="https://wa.me/919876543210"
+          href="https://wa.me/919907434605"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 px-5 py-2.5 rounded-full transition-colors font-bold text-sm border border-[#25D366]/20 group"

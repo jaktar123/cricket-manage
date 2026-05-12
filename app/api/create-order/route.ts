@@ -4,7 +4,7 @@ import { razorpay } from "@/lib/razorpay";
 export async function POST() {
   try {
     const order = await razorpay.orders.create({
-      amount: 5000, // ₹50.00
+      amount: 10000, // ₹100.00
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });

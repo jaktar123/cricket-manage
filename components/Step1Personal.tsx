@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
+import imageCompression from 'browser-image-compression';
 
 type Props = {
   formData: RegistrationData;
@@ -20,23 +21,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
   const roleRefs = useRef<(HTMLLabelElement | null)[]>([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-fall-in");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    roleRefs.current.forEach((ref: HTMLLabelElement | null) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
+    // No observer needed, animation class added directly
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -44,23 +29,55 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
     setFormData((prev: RegistrationData) => ({ ...prev, [name]: value }));
   };
 
+  const handleRoleToggle = (roleValue: string) => {
+    setFormData((prev: RegistrationData) => {
+      let currentRoles = prev.role ? prev.role.split(", ").filter(r => r) : [];
+      
+      if (roleValue === "Wicket Keeper") {
+        if (currentRoles.includes("Wicket Keeper")) {
+          currentRoles = currentRoles.filter(r => r !== "Wicket Keeper");
+        } else {
+          currentRoles.push("Wicket Keeper");
+        }
+      } else {
+        // For Batsman, Bowler, All-Rounder - they are mutually exclusive in the "Main Role" group
+        // First remove any existing main role (anything that isn't Wicket Keeper)
+        currentRoles = currentRoles.filter(r => r === "Wicket Keeper");
+        // Add the new main role
+        currentRoles.unshift(roleValue);
+      }
+      
+      return { ...prev, role: currentRoles.join(", ") };
+    });
+  };
+
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("File is too big! Please upload an image smaller than 2MB.");
+      // Allow up to 20MB for initial upload, but compress it below 100kb
+      if (file.size > 20 * 1024 * 1024) {
+        alert("File is too big! Please upload an image smaller than 20MB.");
         return;
       }
 
       setIsUploading(true);
       try {
+        // Compression options
+        const options = {
+          maxSizeMB: 0.1, // Target size 100kb
+          maxWidthOrHeight: 1024,
+          useWebWorker: true,
+        };
+
+        const compressedFile = await imageCompression(file, options);
+
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('player-photos')
-          .upload(filePath, file);
+          .upload(filePath, compressedFile);
 
         if (uploadError) throw uploadError;
 
@@ -193,59 +210,53 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
                 { value: "All-Rounder", label: t("roleAllRounder"), icon: "fa-medal" },
                 { value: "Wicket Keeper", label: t("roleKeeper"), icon: "fa-hands" },
               ].map((role, index) => (
-                <label
+                <div
                   key={role.value}
-                  ref={(el: HTMLLabelElement | null) => (roleRefs.current[index] = el)}
-                  style={{ animationDelay: `${index * 0.3}s` }}
-                  className="cursor-pointer group opacity-0"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => handleRoleToggle(role.value)}
+                  className={`cursor-pointer group animate-fall-in border rounded-xl p-5 flex flex-col items-center justify-center gap-3 text-center hover:bg-slate-50 transition-all transform hover:-translate-y-1 hover:shadow-lg ${
+                    formData.role.includes(role.value) ? "border-blue-600 bg-blue-50 text-blue-600 shadow-md shadow-blue-100" : "border-slate-200"
+                  }`}
                 >
-                  <input
-                    type="radio"
-                    name="role"
-                    value={role.value}
-                    checked={formData.role === role.value}
-                    onChange={handleChange}
-                    className="hidden"
-                  />
-                  <div
-                    className={`border rounded-lg p-3 text-center hover:bg-slate-50 transition transform hover:-translate-y-1 hover:shadow-md ${
-                      formData.role === role.value ? "border-blue-600 bg-blue-50 text-blue-600" : "border-slate-200"
-                    }`}
-                  >
-                    <i className={`fa-solid ${role.icon} text-xl mb-1 block ${formData.role === role.value ? "text-blue-600" : "text-slate-500"}`}></i>
-                    <span className="text-sm font-medium">{role.label}</span>
-                  </div>
-                </label>
+                  <i className={`fa-solid ${role.icon} text-2xl ${formData.role.includes(role.value) ? "text-blue-600" : "text-slate-500"}`}></i>
+                  <span className="text-sm font-bold tracking-tight">{role.label}</span>
+                </div>
               ))}
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBattingStyle")}</label>
-            <select
-              name="battingStyle"
-              value={formData.battingStyle}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
-            >
-              <option value="Right Hand">{t("batRight")}</option>
-              <option value="Left Hand">{t("batLeft")}</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBowlingStyle")}</label>
-            <select
-              name="bowlingStyle"
-              value={formData.bowlingStyle}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
-            >
-              <option value="None">{t("bowlNone")}</option>
-              <option value="Right Arm Pace">{t("bowlRightPace")}</option>
-              <option value="Right Arm Spin">{t("bowlRightSpin")}</option>
-              <option value="Left Arm Pace">{t("bowlLeftPace")}</option>
-              <option value="Left Arm Spin">{t("bowlLeftSpin")}</option>
-            </select>
-          </div>
+          {/* Batting Style - Show if Batsman or All-Rounder */}
+          {(formData.role.includes("Batsman") || formData.role.includes("All-Rounder")) && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBattingStyle")}</label>
+              <select
+                name="battingStyle"
+                value={formData.battingStyle}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
+              >
+                <option value="Right Hand">{t("batRight")}</option>
+                <option value="Left Hand">{t("batLeft")}</option>
+              </select>
+            </div>
+          )}
+
+          {/* Bowling Style - Show if Bowler or All-Rounder */}
+          {(formData.role.includes("Bowler") || formData.role.includes("All-Rounder")) && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBowlingStyle")}</label>
+              <select
+                name="bowlingStyle"
+                value={formData.bowlingStyle}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
+              >
+                <option value="Right Arm Pace">{t("bowlRightPace")}</option>
+                <option value="Right Arm Spin">{t("bowlRightSpin")}</option>
+                <option value="Left Arm Pace">{t("bowlLeftPace")}</option>
+                <option value="Left Arm Spin">{t("bowlLeftSpin")}</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
@@ -269,9 +280,9 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
         <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-sm text-slate-800 space-y-4">
           <ul className="list-none space-y-3">
             {[t("rule1"), t("rule2"), t("rule3"), t("rule4"), t("rule5")].map((rule, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <i className="fa-solid fa-circle-exclamation text-red-500 mt-1"></i>
-                <span dangerouslySetInnerHTML={{ __html: rule }}></span>
+              <li key={i} className="flex items-start gap-2">
+                <i className="fa-solid fa-circle-exclamation text-red-500 text-lg mt-0.5"></i>
+                <span dangerouslySetInnerHTML={{ __html: rule }} className="leading-relaxed"></span>
               </li>
             ))}
           </ul>
@@ -297,7 +308,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
         >
           <div className="flex items-center gap-3">
             <div className="bg-white p-2 rounded-lg shadow-sm border border-purple-100">
-              <i className="fa-solid fa-trophy text-purple-600 text-xl"></i>
+              <i className="fa-solid fa-list-check text-purple-600 text-xl"></i>
             </div>
             <div>
               <h3 className="font-bold text-slate-800">{t("infoLinkText")}</h3>
