@@ -1,6 +1,7 @@
+export const runtime = "edge";
 import { createClient } from '@/lib/supabase/server'
 import StatCard from '@/components/admin/StatCard'
-import { FaUsers, FaMoneyBillWave, FaCalendarCheck, FaClock } from 'react-icons/fa'
+import { FaUsers, FaMoneyBillWave, FaCalendarCheck, FaClock, FaTrophy } from 'react-icons/fa'
 
 export default async function AdminDashboard() {
   const supabase = createClient()
@@ -22,7 +23,7 @@ export default async function AdminDashboard() {
     <div className="space-y-10">
       <header>
         <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
-        <p className="text-slate-400">Welcome back, Organiser. Here's what's happening today.</p>
+        <p className="text-slate-400">Welcome back, Organiser. Here&apos;s what&apos;s happening today.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -96,4 +97,3 @@ export default async function AdminDashboard() {
   )
 }
 
-import { FaTrophy } from 'react-icons/fa'

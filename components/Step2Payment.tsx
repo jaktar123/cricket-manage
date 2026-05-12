@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
+import Image from "next/image";
 
 type Props = {
   formData: RegistrationData;
@@ -37,11 +38,14 @@ export const Step2Payment = ({ formData, setFormData, onBack, onSubmit, isSubmit
 
       <div className="bg-white rounded-xl p-5 border border-slate-200 mb-8 shadow-sm flex items-start gap-5">
         <div className="shrink-0">
-          <img
-            src={formData.photoUrl || "https://via.placeholder.com/150?text=No+Img"}
-            className="w-24 h-24 rounded-lg object-cover bg-slate-100 border border-slate-200 shadow-sm"
-            alt="Player Photo"
-          />
+            <Image
+              src={formData.photoUrl || "https://via.placeholder.com/150?text=No+Img"}
+              width={96}
+              height={96}
+              className="w-24 h-24 rounded-lg object-cover bg-slate-100 border border-slate-200 shadow-sm"
+              alt="Player Photo"
+              unoptimized
+            />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-bold text-slate-900 leading-tight truncate">{formData.fullName || "Player Name"}</h3>

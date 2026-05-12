@@ -40,6 +40,10 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
       alert("Please fill all required fields and upload a photo.");
       return;
     }
+    if (formData.mobile.length !== 10) {
+      alert("Mobile number must be exactly 10 digits.");
+      return;
+    }
     setStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -134,15 +138,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
       </div>
 
       <div className="glass-effect rounded-2xl shadow-2xl overflow-hidden relative">
-        {/* Background Watermark */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img
-            src="https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop"
-            alt="Cricket Watermark"
-            className="w-full h-full object-cover opacity-10 grayscale contrast-125"
-          />
-          <div className="absolute inset-0 bg-blue-900/5 mix-blend-overlay"></div>
-        </div>
+        <div className="absolute inset-0 z-0 bg-blue-900/5 mix-blend-overlay"></div>
 
         {/* Progress Bar */}
         <div className="h-2 bg-slate-100 w-full flex relative z-10">

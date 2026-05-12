@@ -75,7 +75,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
         {/* Sports Quote */}
         <div className="max-w-2xl mx-auto px-4">
           <p className="text-lg md:text-xl text-blue-100 italic leading-relaxed drop-shadow-md">
-            "Every champion was once a contender that refused to give up."
+            &quot;Every champion was once a contender that refused to give up.&quot;
           </p>
           <div className="w-16 h-1 bg-yellow-500 mx-auto mt-4 rounded-full"></div>
         </div>
@@ -136,14 +136,14 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
         {/* Quotes */}
         <div className="max-w-3xl mx-auto px-6 mt-6">
           <p className="text-base md:text-lg text-emerald-100/90 leading-relaxed text-center drop-shadow-md">
-            "ক্রিকেট শুধু একটা খেলা নয়, এটা আমাদের রক্তে মিশে থাকা আবেগ। ২২ গজের পিচে হার-জিতের চেয়ে বড় হলো শেষ বল পর্যন্ত লড়াই চালিয়ে যাওয়া। নিজের সবটুকু দিয়ে খেলো, কারণ মাঠের ঘাম আর জেদই একদিন তোমায় বিজয়ী করবে।"
+            &quot;ক্রিকেট শুধু একটা খেলা নয়, এটা আমাদের রক্তে মিশে থাকা আবেগ। ২২ গজের পিচে হার-জিতের চেয়ে বড় হলো শেষ বল পর্যন্ত লড়াই চালিয়ে যাওয়া। নিজের সবটুকু দিয়ে খেলো, কারণ মাঠের ঘাম আর জেদই একদিন তোমায় বিজয়ী করবে।&quot;
           </p>
           <div className="w-16 h-1 bg-emerald-500 mx-auto mt-4 rounded-full opacity-60"></div>
         </div>
 
         <div className="max-w-3xl mx-auto px-6 mt-8">
           <p className="text-base md:text-lg text-blue-100/90 leading-relaxed text-center drop-shadow-md italic">
-            "Cricket is not just a game, it is an emotion mixed in our blood. On the 22-yard pitch, more important than winning or losing is fighting until the last ball. Play with everything you have, because only the sweat and determination on the field will make you a winner one day."
+            &quot;Cricket is not just a game, it is an emotion mixed in our blood. On the 22-yard pitch, more important than winning or losing is fighting until the last ball. Play with everything you have, because only the sweat and determination on the field will make you a winner one day.&quot;
           </p>
           <div className="w-16 h-1 bg-blue-500 mx-auto mt-4 rounded-full opacity-60"></div>
         </div>

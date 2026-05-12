@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { FaSearch, FaFilter, FaDownload, FaEdit, FaTrash, FaEye } from 'react-icons/fa'
+import Image from 'next/image'
 import { updatePlayer, deletePlayer } from '@/app/admin/actions'
 
 interface Player {
@@ -177,7 +178,14 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
             <div className="p-8 flex flex-col items-center">
               <div className="w-32 h-32 rounded-xl bg-slate-800 mb-6 overflow-hidden border-2 border-blue-500/30">
                 {selectedPlayer.photo_url ? (
-                  <img src={selectedPlayer.photo_url} alt="Photo" className="w-full h-full object-cover" />
+                  <Image 
+                    src={selectedPlayer.photo_url} 
+                    alt="Photo" 
+                    width={128} 
+                    height={128} 
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-600">No Photo</div>
                 )}

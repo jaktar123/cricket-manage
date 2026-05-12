@@ -2,6 +2,7 @@
 
 import React from "react";
 import { RegistrationData } from "@/lib/types";
+import Image from "next/image";
 
 type Props = {
   formData: RegistrationData;
@@ -38,7 +39,14 @@ export const SuccessScreen = ({ formData, paymentId, onClose }: Props) => {
         <div className="p-8 md:p-10 space-y-8">
           <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-slate-100">
              <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-white shadow-xl rotate-3 transform hover:rotate-0 transition-transform duration-500 shrink-0">
-               <img src={formData.photoUrl} alt="Player" className="w-full h-full object-cover" />
+                <Image 
+                  src={formData.photoUrl} 
+                  alt="Player" 
+                  width={128} 
+                  height={128} 
+                  className="w-full h-full object-cover" 
+                  unoptimized
+                />
              </div>
              <div className="text-center md:text-left flex-1">
                <div className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Official Player Card</div>
@@ -83,7 +91,7 @@ export const SuccessScreen = ({ formData, paymentId, onClose }: Props) => {
           <div className="bg-amber-50 rounded-xl p-5 border border-amber-100 flex items-start gap-4">
             <i className="fa-solid fa-circle-info text-amber-500 text-xl mt-1"></i>
             <div className="text-xs text-amber-900 leading-relaxed">
-              <p className="font-bold mb-1">What's Next?</p>
+              <p className="font-bold mb-1">What&apos;s Next?</p>
               Your registration is now official. Keep this receipt or take a screenshot for your records. Our team will contact you regarding the auction schedule and team assignments via your registered mobile number: <strong>{formData.mobile}</strong>.
             </div>
           </div>

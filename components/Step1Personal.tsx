@@ -5,6 +5,7 @@ import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
 import imageCompression from 'browser-image-compression';
+import Image from 'next/image';
 
 type Props = {
   formData: RegistrationData;
@@ -165,6 +166,8 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
                 type="tel"
                 name="mobile"
                 required
+                minLength={10}
+                maxLength={10}
                 pattern="[0-9]{10}"
                 value={formData.mobile}
                 onChange={handleChange}
@@ -348,7 +351,14 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showP
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="w-48 h-48 rounded-full border-4 border-slate-100 shadow-inner bg-slate-50 flex items-center justify-center overflow-hidden relative group shrink-0">
             {formData.photoUrl ? (
-              <img src={formData.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                <Image 
+                  src={formData.photoUrl} 
+                  alt="Preview" 
+                  width={192} 
+                  height={192} 
+                  className="w-full h-full object-cover" 
+                  unoptimized
+                />
             ) : (
               <div className="text-slate-300 text-6xl">
                 <i className="fa-solid fa-user"></i>
