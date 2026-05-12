@@ -1,6 +1,5 @@
-// export const runtime = "edge";
+export const runtime = "edge";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
@@ -12,12 +11,26 @@ export async function POST(req: Request) {
       formData 
     } = await req.json();
 
-    // Verify signature
+    // Verify signature using Web Crypto API
+    const secret = process.env.RAZORPAY_KEY_SECRET!;
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-      .update(body.toString())
-      .digest("hex");
+    
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signatureBuffer = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(body)
+    );
+    const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
 
     const isSignatureValid = expectedSignature === razorpay_signature;
 
