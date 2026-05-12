@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:cf": "npx @opennextjs/cloudflare build && node -e \"const fs=require('fs'); const path=require('path'); const copyDir=(s,d)=>{if(!fs.existsSync(d))fs.mkdirSync(d);fs.readdirSync(s).forEach(f=>{const ss=path.join(s,f);const dd=path.join(d,f);if(fs.statSync(ss).isDirectory())copyDir(ss,dd);else fs.copyFileSync(ss,dd)})}; copyDir('.open-next/assets','.open-next'); fs.renameSync('.open-next/worker.js','.open-next/_worker.js')\"",
+    "build:cf": "npx @opennextjs/cloudflare build && node -e \"const fs=require('fs'); const path=require('path'); const copyDir=(s,d)=>{if(!fs.existsSync(d))fs.mkdirSync(d);fs.readdirSync(s).forEach(f=>{const ss=path.join(s,f);const dd=path.join(d,f);if(fs.statSync(ss).isDirectory())copyDir(ss,dd);else fs.copyFileSync(ss,dd)})}; copyDir('.open-next/assets','.open-next'); fs.renameSync('.open-next/worker.js','.open-next/_worker.js'); fs.writeFileSync('.open-next/.nojekyll', '');\"",
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
