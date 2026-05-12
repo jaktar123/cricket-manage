@@ -2,8 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { RegistrationData } from '@/lib/types'
 
-export async function updatePlayer(id: string, formData: any) {
+export async function updatePlayer(id: string, formData: RegistrationData) {
   const supabase = await createClient()
   
   const { error } = await supabase

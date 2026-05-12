@@ -2,10 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+body, button, input, select, textarea, span, p, h1, h2, h3, h4, h5, h6, label, div:not([class*="fa-"]) {
+  font-family: 'Google Sans', sans-serif !important;
+  font-optical-sizing: auto;
+  font-variation-settings: "GRAD" 0;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  
+  /* Brand Colors (Vibrant Blue Palette) */
+  --brand-primary-rgb: 54, 98, 227;    /* #3662E3 */
+  --brand-secondary-rgb: 255, 157, 35; /* #FF9D23 */
+  --brand-accent-rgb: 15, 23, 42;      /* #0F172A */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,12 +28,29 @@
 }
 
 body {
-  font-family: "Google Sans", sans-serif !important;
+  margin: 0;
 }
 
 .glass-effect {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.premium-shadow {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.floating-input-group:focus-within label {
+  transform: translateY(-24px) scale(0.85);
+  color: #2563eb;
 }
 
 /* Loading Spinner Animation */
@@ -212,6 +240,40 @@ body {
   animation: ballHitPath 3s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
 }
 
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .anim-crack-active {
   animation: textCrackEffect 1.2s ease-out forwards;
 }
+
+/* --- GLOBAL BRAND UTILITIES (Vibrant Blue) --- */
+.bg-brand-primary { background-color: #3662E3 !important; }
+.text-brand-primary { color: #3662E3 !important; }
+.border-brand-primary { border-color: #3662E3 !important; }
+
+.bg-brand-secondary { background-color: #FF9D23 !important; }
+.text-brand-secondary { color: #FF9D23 !important; }
+.border-brand-secondary { border-color: #FF9D23 !important; }
+
+.bg-brand-accent { background-color: #0F172A !important; }
+.text-brand-accent { color: #0F172A !important; }
+.border-brand-accent { border-color: #0F172A !important; }
+
+/* Opacity utilities updated for Blue palette */
+.bg-brand-primary\/5 { background-color: rgba(54, 98, 227, 0.05) !important; }
+.bg-brand-primary\/10 { background-color: rgba(54, 98, 227, 0.1) !important; }
+.bg-brand-primary\/20 { background-color: rgba(54, 98, 227, 0.2) !important; }
+.bg-brand-primary\/50 { background-color: rgba(54, 98, 227, 0.5) !important; }
+.shadow-brand-primary\/10 { --tw-shadow-color: rgba(54, 98, 227, 0.1) !important; }
+.shadow-brand-primary\/20 { --tw-shadow-color: rgba(54, 98, 227, 0.2) !important; }
+.border-brand-accent\/20 { border-color: rgba(15, 23, 42, 0.2) !important; }
+.border-brand-accent\/30 { border-color: rgba(15, 23, 42, 0.3) !important; }

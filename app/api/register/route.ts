@@ -8,7 +8,8 @@ export async function POST(req: Request) {
       razorpay_payment_id, 
       razorpay_order_id, 
       razorpay_signature,
-      formData 
+      formData,
+      amount 
     } = await req.json();
 
     // Verify signature using Web Crypto API
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
     const supabase = await createClient();
 
     // Save to Supabase
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("players")
       .insert([
         {
@@ -57,14 +58,17 @@ export async function POST(req: Request) {
           photo_url: formData.photoUrl,
           payment_status: "Success",
           payment_id: razorpay_payment_id,
+          order_id: razorpay_order_id,
+          payment_amount: amount,
         },
       ]);
 
     if (error) throw error;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Registration Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

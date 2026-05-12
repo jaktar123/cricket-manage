@@ -4,11 +4,14 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 type Language = "en" | "bn";
 
-const translations: Record<Language, any> = {
+const translations: Record<Language, Record<string, string>> = {
   en: {
     langBtnText: "বাংলা",
     formSubtitle: "Single Player Registration",
-    step1Label: "Step 1 of 2",
+    step1Label: "Step 1 of 3",
+    step2Label: "Step 2 of 3",
+    step3Label: "Step 3 of 3",
+    kitSelectionTitle: "Cricket Profile & Kit",
     personalDetailsTitle: "Personal Details",
     labelFullName: "Full Name",
     placeholderFullName: "e.g. Rohit Sharma",
@@ -39,6 +42,10 @@ const translations: Record<Language, any> = {
     rule3: "If any player has a problem, they should inform the captain. The captain will then inform the tournament committee.",
     rule4: "If any player sledges another player or committee member, they will be <strong>banned for 2 matches</strong>.",
     rule5: "Players must reach the ground on time; if not, they will be <strong>disqualified</strong> from the tournament.",
+    rule6: "Filling the form doesn't guarantee a team. Players will be bought through an auction.",
+    rule7: "Players can be suspended for misbehavior, trouble-making, or rudeness during the tournament.",
+    rule8: "The organizer's decision is final regarding player selection and auction matters.",
+    ruleAdvisory: "Please read all rules and policies carefully before filling the form.",
     consentLabel: "I have read and agree to follow these rules.",
     infoLinkText: "Form Fill-Up Rules",
     infoLinkDesc: "Read the rules before filling out the form.",
@@ -55,7 +62,8 @@ const translations: Record<Language, any> = {
     photoHelp: "High quality photos supported. Compressed automatically.",
     btnBack1: "Back",
     btnContinue: "Continue",
-    step2Title: "Summary & Payment",
+    step2Title: "Cricket Profile & Kit",
+    step3Title: "Summary & Payment",
     step2Desc: "Please review your details before proceeding.",
     sumAgeLabel: "Age",
     sumBatDetailsLabel: "Batting Details",
@@ -73,7 +81,10 @@ const translations: Record<Language, any> = {
   bn: {
     langBtnText: "English",
     formSubtitle: "সিঙ্গেল প্লেয়ার রেজিস্ট্রেশন",
-    step1Label: "ধাপ ১ / ২",
+    step1Label: "ধাপ ১ / ৩",
+    step2Label: "ধাপ ২ / ৩",
+    step3Label: "ধাপ ৩ / ৩",
+    kitSelectionTitle: "ক্রিকেট প্রোফাইল ও কিট",
     personalDetailsTitle: "ব্যক্তিগত বিবরণ",
     labelFullName: "পুরো নাম",
     placeholderFullName: "যেমন: রোহিত শর্মা",
@@ -104,6 +115,10 @@ const translations: Record<Language, any> = {
     rule3: "যদি কোনো খেলোয়াড়ের কোনো সমস্যা থাকে, তবে তাকে অধিনায়ককে (Captain) জানাতে হবে। অধিনায়ক তারপর টুর্নামেন্ট কমিটিকে জানাবেন।",
     rule4: "যদি কোনো খেলোয়াড় অন্য কোনো খেলোয়াড় বা কমিটির সদস্যকে স্লেজিং (Sledging) বা অপমান করে, তবে তাকে <strong>২ ম্যাচের জন্য নিষিদ্ধ (ban)</strong> করা হবে।",
     rule5: "খেলোয়াড়দের ঠিক সময়ে মাঠে পৌঁছাতে হবে; অন্যথায় তাদের টুর্নামেন্ট থেকে <strong>বাতিল</strong> করা হবে।",
+    rule6: "ফর্ম পূরণ করলেই দলে সুযোগ পাওয়া নিশ্চিত নয়। খেলোয়াড়দের নিলামের মাধ্যমে কেনা হবে।",
+    rule7: "টুর্নামেন্ট চলাকালীন খারাপ আচরণ বা বিশৃঙ্খলা করলে খেলোয়াড়কে বহিষ্কার করা হতে পারে।",
+    rule8: "খেলোয়াড় নির্বাচন এবং নিলাম সংক্রান্ত বিষয়ে আয়োজকদের সিদ্ধান্তই চূড়ান্ত।",
+    ruleAdvisory: "ফর্ম পূরণ করার আগে সব নিয়ম এবং নীতিগুলি সাবধানে পড়ুন।",
     consentLabel: "আমি এই নিয়মগুলি পড়েছি এবং মেনে চলতে রাজি আছি।",
     infoLinkText: "সঠিক তথ্য প্রদান",
     infoLinkDesc: "ফর্ম পূরণ করার আগে নিয়মগুলো পড়ুন।",
@@ -120,7 +135,8 @@ const translations: Record<Language, any> = {
     photoHelp: "উচ্চ মানের ছবি আপলোড করুন। অটোমেটিক কম্প্রেস হবে।",
     btnBack1: "পেছনে",
     btnContinue: "চালিয়ে যান",
-    step2Title: "সারাংশ এবং পেমেন্ট",
+    step2Title: "ক্রিকেট প্রোফাইল ও কিট",
+    step3Title: "সারাংশ এবং পেমেন্ট",
     step2Desc: "এগিয়ে যাওয়ার আগে আপনার বিবরণ পর্যালোচনা করুন।",
     sumAgeLabel: "বয়স",
     sumBatDetailsLabel: "ব্যাটিং বিবরণ",
@@ -153,7 +169,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const t = (key: keyof typeof translations.en) => {
-    return (translations as any)[currentLang][key] || key;
+    return translations[currentLang][key] || key;
   };
 
   return (

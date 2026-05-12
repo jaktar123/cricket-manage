@@ -9,4 +9,5 @@ export type RegistrationData = {
   photoUrl: string;
   jerseyNumber: string;
   jerseySize: string;
+  rulesAccepted: boolean;
 };

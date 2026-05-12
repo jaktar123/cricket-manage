@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { SplashScreen } from "@/components/SplashScreen";
-import { IntroScreen } from "@/components/IntroScreen";
+import React from "react";
+import { RegistrationForm } from "@/components/RegistrationForm";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  const [currentScreen, setCurrentScreen] = useState<"splash" | "intro" | "registration">("splash");
+export default function RegistrationPage() {
+  const router = useRouter();
 
   return (
     <main
@@ -19,11 +19,7 @@ export default function Home() {
         backgroundAttachment: "fixed",
       }}
     >
-      {currentScreen === "splash" ? (
-        <SplashScreen onComplete={() => setCurrentScreen("intro")} />
-      ) : (
-        <IntroScreen />
-      )}
+      <RegistrationForm onBackToIntro={() => router.push("/")} />
     </main>
   );
 }

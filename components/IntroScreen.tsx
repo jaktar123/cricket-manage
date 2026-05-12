@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { useLanguage } from "./providers/LanguageProvider";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () => void }) => {
-  const { t } = useLanguage();
+export const IntroScreen = () => {
+  const router = useRouter();
   const [isBallVisible, setIsBallVisible] = useState(false);
   const [isTitleCracked, setIsTitleCracked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -41,7 +41,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
       {/* Striking Ball Animation */}
       {isBallVisible && <div id="introBall" className="anim-title-ball"></div>}
 
-      <div className="relative z-10 animate-fade-in space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10 animate-fade-in space-y-8 py-16">
         {/* Icon: Trophy */}
         <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-500">
           <i
@@ -83,7 +83,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
         {/* CTA Buttons */}
         <div className="pt-8 flex flex-col items-center gap-4">
           <button
-            onClick={onStartRegistration}
+            onClick={() => router.push("/registration")}
             className="group relative inline-flex items-center justify-center px-10 py-5 font-black text-slate-900 transition-all duration-300 bg-gradient-to-br from-white via-slate-50 to-slate-200 rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] border border-white/60 w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl"
           >
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>
@@ -91,7 +91,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
           </button>
 
           <button
-            onClick={onStartRegistration}
+            onClick={() => router.push("/registration")}
             className="group relative inline-flex items-center justify-center px-10 py-5 font-black text-slate-900 transition-all duration-300 bg-gradient-to-br from-white via-slate-50 to-slate-200 rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] border border-white/60 w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl"
           >
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>
@@ -106,7 +106,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <a 
                 href="tel:+919907434605" 
-                className="flex items-center justify-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-2xl transition-all group backdrop-blur-sm"
+                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border-2 border-brand-primary/40 px-6 py-4 rounded-2xl transition-all group backdrop-blur-xl shadow-2xl hover:shadow-brand-primary/20"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
                   <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
@@ -119,7 +119,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
               
               <a 
                 href="tel:+916294979597" 
-                className="flex items-center justify-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-4 rounded-2xl transition-all group backdrop-blur-sm"
+                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border-2 border-brand-primary/40 px-6 py-4 rounded-2xl transition-all group backdrop-blur-xl shadow-2xl hover:shadow-brand-primary/20"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
                   <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
@@ -141,7 +141,7 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
           <div className="w-16 h-1 bg-emerald-500 mx-auto mt-4 rounded-full opacity-60"></div>
         </div>
 
-        <div className="max-w-3xl mx-auto px-6 mt-8">
+        <div className="max-w-3xl mx-auto px-6 mt-8 pb-12">
           <p className="text-base md:text-lg text-blue-100/90 leading-relaxed text-center drop-shadow-md italic">
             &quot;Cricket is not just a game, it is an emotion mixed in our blood. On the 22-yard pitch, more important than winning or losing is fighting until the last ball. Play with everything you have, because only the sweat and determination on the field will make you a winner one day.&quot;
           </p>
@@ -150,7 +150,15 @@ export const IntroScreen = ({ onStartRegistration }: { onStartRegistration: () =
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-6 text-white/30 text-xs">Powered by Triple L</div>
+      <div className="relative z-20 pb-10 flex flex-col items-center gap-2 mt-auto">
+        <div className="text-white/30 text-xs">Powered by Triple L</div>
+        <button 
+          onClick={() => router.push('/admin')}
+          className="text-white/40 text-[11px] underline hover:text-white/80 transition-colors uppercase tracking-[0.2em] font-black mt-1"
+        >
+          Admin Panel
+        </button>
+      </div>
     </div>
   );
 };

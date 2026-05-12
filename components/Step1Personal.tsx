@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
 import { supabase } from "@/lib/supabase";
@@ -12,391 +13,249 @@ type Props = {
   setFormData: React.Dispatch<React.SetStateAction<RegistrationData>>;
   onContinue: () => void;
   onBack: () => void;
-  showPolicy: () => void;
-  showInfo: () => void;
 };
 
-export const Step1Personal = ({ formData, setFormData, onContinue, onBack, showPolicy, showInfo }: Props) => {
+export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Props) => {
   const { t, toggleLanguage } = useLanguage();
   const [isUploading, setIsUploading] = React.useState(false);
-  const roleRefs = useRef<(HTMLLabelElement | null)[]>([]);
-
-  useEffect(() => {
-    // No observer needed, animation class added directly
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev: RegistrationData) => ({ ...prev, [name]: value }));
   };
 
-  const handleRoleToggle = (roleValue: string) => {
-    setFormData((prev: RegistrationData) => {
-      let currentRoles = prev.role ? prev.role.split(", ").filter(r => r) : [];
-      
-      if (roleValue === "Wicket Keeper") {
-        if (currentRoles.includes("Wicket Keeper")) {
-          currentRoles = currentRoles.filter(r => r !== "Wicket Keeper");
-        } else {
-          currentRoles.push("Wicket Keeper");
-        }
-      } else {
-        // For Batsman, Bowler, All-Rounder - they are mutually exclusive in the "Main Role" group
-        // First remove any existing main role (anything that isn't Wicket Keeper)
-        currentRoles = currentRoles.filter(r => r === "Wicket Keeper");
-        // Add the new main role
-        currentRoles.unshift(roleValue);
-      }
-      
-      return { ...prev, role: currentRoles.join(", ") };
-    });
-  };
+
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Allow up to 20MB for initial upload, but compress it below 100kb
       if (file.size > 20 * 1024 * 1024) {
         alert("File is too big! Please upload an image smaller than 20MB.");
         return;
       }
-
       setIsUploading(true);
       try {
-        // Compression options
         const options = {
-          maxSizeMB: 0.1, // Target size 100kb
+          maxSizeMB: 0.1,
           maxWidthOrHeight: 1024,
           useWebWorker: true,
         };
-
         const compressedFile = await imageCompression(file, options);
-
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('player-photos')
-          .upload(filePath, compressedFile);
-
+        const { error: uploadError } = await supabase.storage.from('player-photos').upload(filePath, compressedFile);
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('player-photos')
-          .getPublicUrl(filePath);
-
+        const { data: { publicUrl } } = supabase.storage.from('player-photos').getPublicUrl(filePath);
         setFormData((prev: RegistrationData) => ({ ...prev, photoUrl: publicUrl }));
-      } catch (error: any) {
-        alert("Error uploading image: " + error.message);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        alert("Error uploading image: " + errorMessage);
       } finally {
         setIsUploading(false);
       }
     }
   };
 
+  const inputClasses = "w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-brand-accent bg-white text-slate-900 placeholder-slate-400 focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 outline-none transition-all duration-300 font-semibold shadow-sm";
+  const labelHeaderClasses = "block text-sm font-black text-slate-700 uppercase tracking-widest mb-3 ml-1";
+
+
+  const isStep1Valid = !!(
+    formData.fullName && 
+    formData.age && 
+    formData.mobile && 
+    formData.photoUrl && 
+    formData.rulesAccepted
+  );
+
   return (
-    <div id="step1" className="space-y-8">
-      {/* Personal Details */}
-      <div>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 border-b-2 border-slate-200 pb-3 mb-6 flex items-center justify-between">
-          <div className="flex items-center">
-            <i className="fa-regular fa-id-card mr-2 text-blue-600"></i>
-            <span>{t("personalDetailsTitle")}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 transition flex items-center gap-2 shadow-sm"
-            >
-              <i className="fa-solid fa-language text-lg"></i>
-              <span className="font-bold">{t("langBtnText")}</span>
-            </button>
-            <span className="text-xs font-sans font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded align-middle hidden sm:inline-block">
-              {t("step1Label")}
-            </span>
-          </div>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">{t("labelFullName")}</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i className="fa-regular fa-user text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg"></i>
-              </div>
-              <input
-                type="text"
-                name="fullName"
-                required
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder={t("placeholderFullName")}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:ring-0 outline-none transition-all duration-300 font-medium shadow-sm hover:border-blue-200"
-              />
-            </div>
+    <div id="step1" className="space-y-12">
+      {/* Personal Details Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/20">
+            <i className="fa-regular fa-id-card text-white text-xl"></i>
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">{t("labelAge")}</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i className="fa-solid fa-cake-candles text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg"></i>
-              </div>
-              <input
-                type="number"
-                name="age"
-                required
-                min="10"
-                max="99"
-                value={formData.age}
-                onChange={handleChange}
-                placeholder="e.g. 24"
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:ring-0 outline-none transition-all duration-300 font-medium shadow-sm hover:border-blue-200"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">{t("labelMobile")}</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i className="fa-solid fa-mobile-screen text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg"></i>
-              </div>
-              <input
-                type="tel"
-                name="mobile"
-                required
-                minLength={10}
-                maxLength={10}
-                pattern="[0-9]{10}"
-                value={formData.mobile}
-                onChange={handleChange}
-                placeholder={t("placeholderMobile")}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:ring-0 outline-none transition-all duration-300 font-medium shadow-sm hover:border-blue-200"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">
-              <span>{t("labelEmailMain")}</span> <span className="text-slate-400 font-normal text-xs">{t("labelEmailOpt")}</span>
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i className="fa-regular fa-envelope text-slate-400 group-focus-within:text-blue-600 transition-colors text-lg"></i>
-              </div>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder={t("placeholderEmail")}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:ring-0 outline-none transition-all duration-300 font-medium shadow-sm hover:border-blue-200"
-              />
-            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{t("personalDetailsTitle")}</h2>
+            <p className="text-sm text-slate-500 font-medium">{t("step1Label")}</p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="self-start sm:self-center px-4 py-2 rounded-xl bg-white border-2 border-brand-accent text-brand-primary hover:bg-brand-primary hover:text-white transition-all duration-300 flex items-center gap-2 text-sm font-black uppercase tracking-widest shadow-sm"
+        >
+          <i className="fa-solid fa-language text-lg"></i>
+          <span>{t("langBtnText")}</span>
+        </button>
       </div>
 
-      {/* Player Stats */}
-      <div className="mt-8">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 border-b-2 border-slate-200 pb-3 mb-6 flex items-center">
-          <i className="fa-solid fa-trophy mr-2 text-blue-600"></i> <span className="ml-2">{t("playerStatsTitle")}</span>
-        </h2>
+      {/* Form Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {[
+          { name: "fullName", icon: "fa-user", label: t("labelFullName"), placeholder: t("placeholderFullName"), type: "text" },
+          { name: "age", icon: "fa-cake-candles", label: t("labelAge"), placeholder: "e.g. 24", type: "number", min: 10, max: 99 },
+          { name: "mobile", icon: "fa-mobile-screen", label: t("labelMobile"), placeholder: t("placeholderMobile"), type: "tel", pattern: "[0-9]{10}" },
+          { name: "email", icon: "fa-envelope", label: `${t("labelEmailMain")} (Optional)`, placeholder: t("placeholderEmail"), type: "email" },
+        ].map((field) => (
+          <div key={field.name} className="flex flex-col">
+            <label className={labelHeaderClasses}>{field.label}</label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                <i className={`fa-regular ${field.icon} text-brand-primary transition-colors text-lg`}></i>
+              </div>
+              <input
+                {...field}
+                required={field.name !== "email"}
+                value={formData[field.name as keyof RegistrationData] as string}
+                onChange={handleChange}
+                className={inputClasses}
+                placeholder={field.placeholder}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelPrimaryRole")}</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { value: "Batsman", label: t("roleBatsman"), icon: "fa-person-running" },
-                { value: "Bowler", label: t("roleBowler"), icon: "fa-baseball" },
-                { value: "All-Rounder", label: t("roleAllRounder"), icon: "fa-medal" },
-                { value: "Wicket Keeper", label: t("roleKeeper"), icon: "fa-hands" },
-              ].map((role, index) => (
-                <div
-                  key={role.value}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => handleRoleToggle(role.value)}
-                  className={`cursor-pointer group animate-fall-in border rounded-xl p-5 flex flex-col items-center justify-center gap-3 text-center hover:bg-slate-50 transition-all transform hover:-translate-y-1 hover:shadow-lg ${
-                    formData.role.includes(role.value) ? "border-blue-600 bg-blue-50 text-blue-600 shadow-md shadow-blue-100" : "border-slate-200"
-                  }`}
-                >
-                  <i className={`fa-solid ${role.icon} text-2xl ${formData.role.includes(role.value) ? "text-blue-600" : "text-slate-500"}`}></i>
-                  <span className="text-sm font-bold tracking-tight">{role.label}</span>
+      {/* Photo Upload Section */}
+      <div className="space-y-8 py-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/20">
+            <i className="fa-solid fa-camera text-white text-lg"></i>
+          </div>
+          <h3 className="text-xl font-bold text-slate-900">{t("photoTitle")}</h3>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center gap-10 bg-white p-8 rounded-[2.5rem] border-2 border-brand-accent">
+          <div className="relative group">
+            <div className={`w-48 h-48 rounded-[3rem] border-4 ${formData.photoUrl ? 'border-brand-primary' : 'border-slate-100'} shadow-2xl bg-slate-50 flex items-center justify-center overflow-hidden relative transition-all duration-500 group-hover:scale-105`}>
+              {formData.photoUrl ? (
+                <Image src={formData.photoUrl} alt="Preview" width={192} height={192} className="w-full h-full object-cover" unoptimized />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-slate-300">
+                  <i className="fa-solid fa-user text-6xl text-brand-primary/20"></i>
+                  <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
                 </div>
-              ))}
+              )}
+              {isUploading && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                  <div className="spinner !border-brand-primary !w-8 !h-8"></div>
+                </div>
+              )}
             </div>
           </div>
-          {/* Batting Style - Show if Batsman or All-Rounder */}
-          {(formData.role.includes("Batsman") || formData.role.includes("All-Rounder")) && (
+
+          <div className="flex-1 w-full space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBattingStyle")}</label>
-              <select
-                name="battingStyle"
-                value={formData.battingStyle}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
-              >
-                <option value="Right Hand">{t("batRight")}</option>
-                <option value="Left Hand">{t("batLeft")}</option>
-              </select>
-            </div>
-          )}
-
-          {/* Bowling Style - Show if Bowler or All-Rounder */}
-          {(formData.role.includes("Bowler") || formData.role.includes("All-Rounder")) && (
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">{t("labelBowlingStyle")}</label>
-              <select
-                name="bowlingStyle"
-                value={formData.bowlingStyle}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white focus:border-blue-500 outline-none"
-              >
-                <option value="Right Arm Pace">{t("bowlRightPace")}</option>
-                <option value="Right Arm Spin">{t("bowlRightSpin")}</option>
-                <option value="Left Arm Pace">{t("bowlLeftPace")}</option>
-                <option value="Left Arm Spin">{t("bowlLeftSpin")}</option>
-              </select>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Basic Rules */}
-      <div className="mt-8">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 border-b-2 border-slate-200 pb-3 mb-6 flex items-center justify-between">
-          <div className="flex items-center">
-            <i className="fa-solid fa-gavel mr-2 text-blue-600"></i>
-            <span className="ml-2">{t("rulesTitle")}</span>
-          </div>
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 transition flex items-center gap-2 shadow-sm"
-          >
-            <i className="fa-solid fa-language text-lg"></i>
-            <span className="font-bold">{t("langBtnText")}</span>
-          </button>
-        </h2>
-
-        <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-sm text-slate-800 space-y-4">
-          <ul className="list-none space-y-3">
-            {[t("rule1"), t("rule2"), t("rule3"), t("rule4"), t("rule5")].map((rule, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <i className="fa-solid fa-circle-exclamation text-red-500 text-lg mt-0.5"></i>
-                <span dangerouslySetInnerHTML={{ __html: rule }} className="leading-relaxed"></span>
-              </li>
-            ))}
-          </ul>
-          <div className="pt-2 border-t border-red-100 flex items-center gap-3 mt-2">
-            <input
-              type="checkbox"
-              required
-              id="rulesConsent"
-              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-            />
-            <label htmlFor="rulesConsent" className="font-bold text-slate-900 cursor-pointer select-none">
-              {t("consentLabel")}
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Info & Policy Links */}
-      <div className="space-y-4 mt-8">
-        <div
-          onClick={showInfo}
-          className="bg-purple-50/50 border border-purple-100 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:bg-purple-50 cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-2 rounded-lg shadow-sm border border-purple-100">
-              <i className="fa-solid fa-list-check text-purple-600 text-xl"></i>
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800">{t("infoLinkText")}</h3>
-              <p className="text-xs text-slate-500">{t("infoLinkDesc")}</p>
-            </div>
-          </div>
-          <button type="button" className="w-full sm:w-auto text-sm bg-white border-2 border-purple-200 text-purple-600 hover:bg-purple-600 hover:text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-sm">
-            {t("infoBtnView")}
-          </button>
-        </div>
-
-        <div
-          onClick={showPolicy}
-          className="bg-blue-50/50 border border-blue-100 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:bg-blue-50 cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-2 rounded-lg shadow-sm border border-blue-100">
-              <i className="fa-solid fa-gavel text-blue-600 text-xl"></i>
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800">{t("policyLinkText")}</h3>
-              <p className="text-xs text-slate-500">{t("policyLinkDesc")}</p>
-            </div>
-          </div>
-          <button type="button" className="w-full sm:w-auto text-sm bg-white border-2 border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-sm">
-            {t("policyBtnView")}
-          </button>
-        </div>
-      </div>
-
-      {/* Photo Upload */}
-      <div className="mt-8">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 border-b-2 border-slate-200 pb-3 mb-6 flex items-center">
-          <i className="fa-solid fa-camera mr-2 text-blue-600"></i> <span className="ml-2">{t("photoTitle")}</span>
-        </h2>
-
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-48 h-48 rounded-full border-4 border-slate-100 shadow-inner bg-slate-50 flex items-center justify-center overflow-hidden relative group shrink-0">
-            {formData.photoUrl ? (
-                <Image 
-                  src={formData.photoUrl} 
-                  alt="Preview" 
-                  width={192} 
-                  height={192} 
-                  className="w-full h-full object-cover" 
-                  unoptimized
+              <label className="block text-sm font-black text-slate-400 uppercase tracking-widest mb-3">{t("photoLabel")}</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  required={!formData.photoUrl}
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                  id="photo-upload"
                 />
-            ) : (
-              <div className="text-slate-300 text-6xl">
-                <i className="fa-solid fa-user"></i>
+                <label
+                  htmlFor="photo-upload"
+                  className="flex items-center justify-center gap-3 w-full px-8 py-5 rounded-2xl bg-white border-2 border-brand-accent text-brand-primary font-black uppercase tracking-widest text-xs hover:bg-brand-primary hover:text-white transition-all duration-300 cursor-pointer shadow-sm group"
+                >
+                  <i className="fa-solid fa-cloud-arrow-up text-lg"></i>
+                  <span>{formData.photoUrl ? "Change Photo" : "Select Photo"}</span>
+                </label>
               </div>
-            )}
-          </div>
-
-          <div className="flex-1 w-full">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">{t("photoLabel")}</label>
-            <input
-              type="file"
-              accept="image/*"
-              required={!formData.photoUrl}
-              onChange={handlePhotoChange}
-              className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer border border-slate-200 rounded-lg"
-            />
-            <p className="text-xs text-slate-400 mt-2">{t("photoHelp")}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="pt-6 border-t border-slate-100 mt-8 flex justify-between">
+      {/* Tournament Rules Section */}
+      <div className="p-8 rounded-[2rem] bg-[#FFF9F0] border-2 border-[#F3E5AB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/20">
+            <i className="fa-solid fa-gavel text-white text-lg"></i>
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 tracking-tight">{t("rulesTitle")}</h3>
+        </div>
+        
+        <ul className="space-y-1">
+          {[t("rule1"), t("rule2"), t("rule3"), t("rule4"), t("rule5"), t("rule6"), t("rule7"), t("rule8")].map((rule, i) => (
+            <motion.li 
+              key={i} 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="flex items-start gap-3 p-1 rounded-xl hover:bg-white/60 transition-colors"
+            >
+              <div className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-brand-primary shadow-[0_0_8px_rgba(var(--brand-primary-rgb),0.5)]"></div>
+              <span dangerouslySetInnerHTML={{ __html: rule }} className="text-sm font-medium text-slate-700 leading-tight"></span>
+            </motion.li>
+          ))}
+        </ul>
+        
+        <div className="mt-8 pt-6 border-t border-[#EADBC8]/40">
+          <label className="flex items-center gap-4 cursor-pointer group p-2">
+            <div className="relative">
+              <input
+                type="checkbox"
+                required
+                id="rulesConsent"
+                className="peer sr-only"
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  e.target.setCustomValidity(isChecked ? "" : "Please accept the rules to continue");
+                  // Trigger a re-render to ensure peer classes work or use state
+                  setFormData(prev => ({ ...prev, rulesAccepted: isChecked }));
+                }}
+              />
+                <div className={`w-7 h-7 rounded-xl border-2 transition-all duration-300 flex items-center justify-center shadow-sm ${
+                formData.rulesAccepted 
+                  ? "bg-brand-primary border-brand-primary shadow-brand-primary/20" 
+                  : "bg-white border-[#EADBC8]"
+              }`}>
+                <i className={`fa-solid fa-check text-white text-xs transition-all duration-300 ${
+                  formData.rulesAccepted ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                }`}></i>
+              </div>
+            </div>
+            <span className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors uppercase tracking-widest text-xs">
+              {t("consentLabel")}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between pt-10 border-t border-slate-100">
         <button
           type="button"
           onClick={onBack}
-          className="text-slate-500 hover:text-slate-800 font-bold py-3 px-6 rounded-xl transition flex items-center gap-2"
+          className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
         >
-          <i className="fa-solid fa-arrow-left"></i> <span>{t("btnBack1")}</span>
+          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+            <i className="fa-solid fa-arrow-left"></i>
+          </div>
+          <span>{t("btnBack1")}</span>
         </button>
-        <button
+        
+        <motion.button
+          whileHover={isStep1Valid ? { scale: 1.05, x: 5 } : {}}
+          whileTap={isStep1Valid ? { scale: 0.95 } : {}}
           type="button"
+          disabled={!isStep1Valid}
           onClick={onContinue}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2"
+          className={`flex items-center gap-4 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all duration-300 group ${
+            isStep1Valid 
+              ? "bg-brand-primary text-white shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110" 
+              : "bg-slate-200 text-slate-400 border-2 border-slate-300 cursor-not-allowed opacity-70"
+          }`}
         >
           <span>{t("btnContinue")}</span>
-          <i className="fa-solid fa-arrow-right"></i>
-        </button>
+          <i className={`fa-solid fa-arrow-right ${isStep1Valid ? "group-hover:translate-x-1" : ""} transition-transform`}></i>
+        </motion.button>
       </div>
     </div>
   );

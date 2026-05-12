@@ -1,198 +1,171 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
 import Image from "next/image";
 
 type Props = {
   formData: RegistrationData;
-  setFormData: React.Dispatch<React.SetStateAction<RegistrationData>>;
   onBack: () => void;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
 };
 
-export const Step2Payment = ({ formData, setFormData, onBack, onSubmit, isSubmitting }: Props) => {
+export const Step2Payment = ({ formData, onBack, onSubmit, isSubmitting }: Props) => {
   const { t, currentLang } = useLanguage();
 
-  const handleSizeSelect = (size: string) => {
-    setFormData((prev: RegistrationData) => ({ ...prev, jerseySize: size }));
-  };
 
-  const handleJerseyNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev: RegistrationData) => ({ ...prev, jerseyNumber: e.target.value }));
-  };
-
-  const jerseyName = formData.fullName.trim().split(" ")[0].toUpperCase().substring(0, 10);
 
   return (
-    <div id="step2" className="animate-fade-in">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-          <i className="fa-solid fa-file-invoice-dollar text-3xl text-blue-600"></i>
+    <div id="step2" className="space-y-10">
+      {/* Header Section */}
+      <div className="flex flex-col items-center text-center gap-4 border-b border-slate-100 pb-8">
+        <div className="w-16 h-16 rounded-[2rem] bg-brand-primary flex items-center justify-center shadow-xl shadow-brand-primary/20 mb-2">
+          <i className="fa-solid fa-file-invoice-dollar text-white text-2xl"></i>
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">{t("step2Title")}</h2>
-        <p className="text-slate-500">{t("step2Desc")}</p>
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">{t("step2Title")}</h2>
+          <p className="text-slate-500 font-medium max-w-sm mx-auto">{t("step2Desc")}</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl p-5 border border-slate-200 mb-8 shadow-sm flex items-start gap-5">
-        <div className="shrink-0">
-            <Image
-              src={formData.photoUrl || "https://via.placeholder.com/150?text=No+Img"}
-              width={96}
-              height={96}
-              className="w-24 h-24 rounded-lg object-cover bg-slate-100 border border-slate-200 shadow-sm"
-              alt="Player Photo"
-              unoptimized
-            />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-bold text-slate-900 leading-tight truncate">{formData.fullName || "Player Name"}</h3>
-          <p className="text-sm text-slate-500 font-medium mt-0.5">
-            <span>{t("sumAgeLabel")}</span>: <span className="text-slate-700">{formData.age || "-"} {currentLang === "en" ? "Years" : "বছর"}</span>
-          </p>
-
-          <div className="mt-2 pt-2 border-t border-slate-100">
-            <p className="text-xs text-slate-500 uppercase tracking-wide font-bold">{t("sumBatDetailsLabel")}</p>
-            <div className="text-sm text-slate-800 font-medium">
-              <span>{formData.role || "-"}</span> • <span className="text-xs text-slate-600">{formData.battingStyle} / {formData.bowlingStyle}</span>
+      {/* Ticket Style Player Summary */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative group"
+      >
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+        <div className="relative bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col md:flex-row items-center gap-8 overflow-hidden">
+          {/* Holographic Pattern Background */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 rounded-bl-[5rem] pointer-events-none"></div>
+          
+          <div className="relative shrink-0">
+            <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl relative group/img">
+              <Image
+                src={formData.photoUrl || "https://via.placeholder.com/150?text=No+Img"}
+                width={128}
+                height={128}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110"
+                alt="Player Photo"
+                unoptimized
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-brand-secondary flex items-center justify-center border-4 border-white shadow-lg">
+              <i className="fa-solid fa-star text-white text-xs"></i>
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 mt-2 flex items-center">
-            <i className="fa-solid fa-phone mr-1.5 text-slate-300"></i> <span>{formData.mobile || "-"}</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Premium Kit Section */}
-      <div className="bg-slate-900 rounded-2xl p-6 mb-8 relative overflow-hidden shadow-2xl border border-slate-700">
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-blue-600 rounded-full blur-[80px] opacity-20"></div>
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-yellow-500 rounded-full blur-[80px] opacity-10"></div>
-
-        <div className="relative z-10">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900 text-xs px-2 py-1 rounded font-bold mr-3">
-              {t("jerseyTitle")}
-            </span>
-          </h3>
-
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex flex-col items-center justify-center relative group">
-              <div className="text-[10px] text-slate-400 uppercase tracking-[0.2em] mb-2">{t("jerseySeason")}</div>
-              <div className="relative w-32 h-32 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
-                <i className="fa-solid fa-shirt text-[8rem] text-[#0078BC] drop-shadow-2xl"></i>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
-                  <span className="text-[#FF9933] font-bold text-[10px] uppercase tracking-wider">{jerseyName || "PLAYER"}</span>
-                  <span className="text-[#FF9933] font-black text-3xl -mt-1" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-                    {formData.jerseyNumber || "10"}
-                  </span>
-                </div>
-                <div className="absolute top-8 left-8 text-yellow-400 text-xs">
-                  <i className="fa-solid fa-crown"></i>
-                </div>
-              </div>
+          <div className="flex-1 text-center md:text-left min-w-0">
+            <div className="inline-block px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-black uppercase tracking-widest mb-3 border border-brand-primary/10">
+              Season 2 Player
+            </div>
+            <h3 className="text-3xl font-black text-slate-900 leading-none truncate mb-2">{formData.fullName || "Player Name"}</h3>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+              <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-brand-primary"></span>
+                {t("sumAgeLabel")}: <span className="text-slate-900">{formData.age || "-"} {currentLang === "en" ? "Yrs" : "বছর"}</span>
+              </p>
+              <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-brand-secondary"></span>
+                {formData.role || "Role Not Set"}
+              </p>
             </div>
 
-            <div className="flex-1 space-y-5">
+            <div className="mt-6 pt-6 border-t border-dashed border-slate-200 flex items-center justify-center md:justify-start gap-6">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">{t("jerseyNumLabel")}</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    max="999"
-                    value={formData.jerseyNumber}
-                    onChange={handleJerseyNumberChange}
-                    className="w-full bg-slate-800 border border-slate-600 text-white rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-bold tracking-wider"
-                  />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t("sumBatDetailsLabel")}</p>
+                <div className="text-sm font-black text-slate-800">
+                  {formData.battingStyle} / {formData.bowlingStyle}
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-2">{t("jerseySizeLabel")}</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {["S", "M", "L", "XL", "XXL"].map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => handleSizeSelect(size)}
-                      className={`p-2 rounded-lg text-xs font-bold transition-all transform ${
-                        formData.jerseySize === size
-                          ? "bg-[#0078BC] border border-[#0078BC] text-white shadow-lg shadow-[#0078BC]/50 scale-105"
-                          : "bg-slate-800 border border-slate-600 text-slate-400 hover:border-slate-500"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
+              <div className="hidden sm:block h-8 w-[1px] bg-slate-100"></div>
+              <div className="hidden sm:block">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mobile</p>
+                <div className="text-sm font-black text-slate-800">{formData.mobile || "-"}</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Payment Summary */}
-      <div className="flex items-center justify-between text-sm text-slate-600 bg-blue-50 p-5 rounded-lg border border-blue-100 mb-8">
-        <div className="flex items-center gap-3">
-          <div className="bg-white p-2 rounded shadow-sm">
-            <i className="fa-solid fa-tag text-blue-600"></i>
+      {/* Payment Information Section */}
+
+      {/* Payment Information Section */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border-2 border-brand-accent">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center shadow-md border border-slate-100 text-brand-primary">
+            <i className="fa-solid fa-receipt text-xl"></i>
           </div>
-          <span className="font-medium">{t("feeLabel")}</span>
+          <div>
+            <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t("feeLabel")}</span>
+            <span className="text-3xl font-black text-slate-900 tracking-tight">₹100<span className="text-sm font-bold text-slate-400">.00</span></span>
+          </div>
         </div>
-        <span className="text-2xl font-bold text-blue-700">₹100.00</span>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+          <i className="fa-solid fa-shield-check text-sm"></i>
+          <span className="text-[10px] font-black uppercase tracking-widest">Safe & Secure Payment</span>
+        </div>
       </div>
 
-      {/* Actions */}
-      <form onSubmit={onSubmit}>
-        <div className="flex gap-4 pt-4">
+      {/* Final Action Buttons */}
+      <form onSubmit={onSubmit} className="space-y-6">
+        <div className="flex flex-col sm:flex-row gap-4">
           <button
             type="button"
             onClick={onBack}
-            className="w-1/3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-xl shadow-sm transition"
+            className="w-full sm:w-1/3 px-8 py-5 rounded-[2rem] bg-white border-2 border-brand-secondary text-slate-500 font-black uppercase tracking-widest text-xs hover:text-brand-primary transition-all duration-300 flex items-center justify-center gap-3"
           >
-            <i className="fa-solid fa-arrow-left mr-2"></i> <span>{t("btnBack2")}</span>
+            <i className="fa-solid fa-arrow-left"></i>
+            <span>{t("btnBack2")}</span>
           </button>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={isSubmitting}
-            className="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            className="w-full sm:w-2/3 px-10 py-5 rounded-[2rem] bg-brand-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-4 relative overflow-hidden group"
           >
             {isSubmitting ? (
-              <>
-                <div className="spinner mr-2"></div> Processing...
-              </>
+              <div className="flex items-center gap-3">
+                <div className="spinner !border-white !w-5 !h-5"></div>
+                <span>Processing...</span>
+              </div>
             ) : (
               <>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
                 <span>{t("btnPay")}</span>
-                <i className="fa-solid fa-lock ml-1 text-xs opacity-75"></i>
+                <i className="fa-solid fa-lock text-[10px]"></i>
               </>
             )}
-          </button>
+          </motion.button>
         </div>
+
+        <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+          <i className="fa-solid fa-shield-halved text-brand-primary/50"></i>
+          {t("securePayText")}
+        </p>
       </form>
 
-      <p className="text-center text-xs text-slate-400 mt-4">
-        <i className="fa-solid fa-shield-halved mr-1"></i> <span>{t("securePayText")}</span>
-      </p>
-
-      {/* WhatsApp Support Section */}
-      <div className="mt-8 border-t border-slate-100 pt-6 text-center">
-        <p className="text-slate-500 text-sm font-medium mb-3">
-          {t("helpTitle")} <span className="font-normal text-slate-400">(রেজিস্ট্রেশনে সাহায্য লাগবে?)</span>
+      {/* Refined WhatsApp Support Section */}
+      <div className="pt-10 border-t border-slate-100 flex flex-col items-center gap-4">
+        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+          {t("helpTitle")}
         </p>
-        <a
+        <motion.a
+          whileHover={{ scale: 1.05 }}
           href="https://wa.me/919907434605"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 px-5 py-2.5 rounded-full transition-colors font-bold text-sm border border-[#25D366]/20 group"
+          className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-[#25D366]/20 group"
         >
-          <i className="fa-brands fa-whatsapp text-xl group-hover:scale-110 transition-transform"></i>
+          <i className="fa-brands fa-whatsapp text-lg group-hover:rotate-12 transition-transform"></i>
           <span>{t("btnChat")}</span>
-        </a>
+        </motion.a>
       </div>
     </div>
   );

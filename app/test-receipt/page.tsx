@@ -15,6 +15,7 @@ export default function TestReceiptPage() {
     photoUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=500&auto=format&fit=crop",
     jerseyNumber: "45",
     jerseySize: "L",
+    rulesAccepted: true,
   };
 
   return (
