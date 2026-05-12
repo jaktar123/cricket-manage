@@ -1,10 +1,10 @@
-export const runtime = "edge";
+
 import { createClient } from '@/lib/supabase/server'
 import StatCard from '@/components/admin/StatCard'
 import { FaUsers, FaMoneyBillWave, FaCalendarCheck, FaClock, FaTrophy } from 'react-icons/fa'
 
 export default async function AdminDashboard() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Fetch stats
   const { count: totalPlayers } = await supabase

@@ -1,9 +1,9 @@
-export const runtime = "edge";
+
 import { createClient } from '@/lib/supabase/server'
 import PlayersTable from '@/components/admin/PlayersTable'
 
 export default async function PlayersPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data: players, error } = await supabase
     .from('players')
