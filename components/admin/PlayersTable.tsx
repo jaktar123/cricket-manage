@@ -309,7 +309,13 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
                   <p className="text-slate-500 text-xs">{player.email}</p>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                    player.payment_status === 'Success' 
+                      ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                      : player.payment_status === 'PENDING'
+                      ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                      : 'bg-red-500/10 text-red-500 border-red-500/20'
+                  }`}>
                     {player.payment_status}
                   </span>
                   {player.razorpay_payment_id && (
@@ -401,7 +407,13 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
                 </div>
                 <div>
                   <p className="text-slate-500 mb-1">Payment Status</p>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                    selectedPlayer.payment_status === 'Success' 
+                      ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                      : selectedPlayer.payment_status === 'PENDING'
+                      ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                      : 'bg-red-500/10 text-red-500 border-red-500/20'
+                  }`}>
                     {selectedPlayer.payment_status}
                   </span>
                 </div>

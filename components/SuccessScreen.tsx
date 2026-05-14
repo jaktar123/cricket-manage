@@ -83,7 +83,7 @@ export const SuccessScreen = ({ formData, paymentId, onClose }: Props) => {
                 <span>Amount Paid</span>
                 <i className="fa-solid fa-shield-check text-brand-primary"></i>
               </div>
-              <div className="text-4xl font-black text-slate-900 mt-2">₹100<span className="text-sm">.00</span></div>
+              <div className="text-4xl font-black text-slate-900 mt-2">Paid<span className="text-sm"></span></div>
               <div className="text-[10px] text-brand-primary font-black uppercase tracking-widest mt-2">Verified Payment</div>
             </div>
           </div>

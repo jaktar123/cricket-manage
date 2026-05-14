@@ -73,7 +73,7 @@ const translations: Record<Language, Record<string, string>> = {
     jerseySizeLabel: "Jersey Size",
     feeLabel: "Registration Fee",
     btnBack2: "Back",
-    btnPay: "Pay ₹100 & Register",
+    btnPay: "Pay & Register",
     securePayText: "Secure payment powered by Razorpay",
     helpTitle: "Need help with registration?",
     btnChat: "Chat with Support"
@@ -146,7 +146,7 @@ const translations: Record<Language, Record<string, string>> = {
     jerseySizeLabel: "জার্সির সাইজ",
     feeLabel: "রেজিস্ট্রেশন ফি",
     btnBack2: "পেছনে",
-    btnPay: "১০০ টাকা দিন এবং রেজিস্টার করুন",
+    btnPay: "পেমেন্ট করুন এবং রেজিস্টার করুন",
     securePayText: "রেজারপে দ্বারা সুরক্ষিত পেমেন্ট",
     helpTitle: "রেজিস্ট্রেশনে সাহায্য লাগবে?",
     btnChat: "সাপোর্টের সাথে কথা বলুন"

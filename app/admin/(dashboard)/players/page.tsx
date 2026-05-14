@@ -30,8 +30,8 @@ export default async function PlayersPage() {
           <p className="text-slate-400">View and manage all tournament registrations.</p>
         </div>
         <div className="text-right">
-          <p className="text-slate-500 text-sm">Total Count</p>
-          <p className="text-2xl font-bold text-white">{players?.length || 0}</p>
+          <p className="text-slate-500 text-sm">Total Confirmed</p>
+          <p className="text-2xl font-bold text-white">{players?.filter(p => p.payment_status === 'Success').length || 0}</p>
         </div>
       </header>
 

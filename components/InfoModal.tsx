@@ -3,8 +3,13 @@
 import React from "react";
 import { useLanguage } from "./providers/LanguageProvider";
 
-export const InfoModal = ({ onClose }: { onClose: () => void }) => {
+export const InfoModal = ({ onClose, totalFee }: { onClose: () => void; totalFee: number }) => {
   const { t, toggleLanguage, currentLang } = useLanguage();
+
+  const toBengaliDigits = (num: number) => {
+    const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    return num.toString().split("").map(digit => bengaliDigits[parseInt(digit)] || digit).join("");
+  };
 
   return (
     <div
@@ -47,8 +52,8 @@ export const InfoModal = ({ onClose }: { onClose: () => void }) => {
                   <i className="fa-solid fa-credit-card text-brand-primary"></i>
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">Registration Fee: ₹100 Only</h4>
-                  <p className="text-xs text-slate-600 font-medium leading-relaxed">Every player must submit ₹100 during form fill-up. Registration fee is non-refundable. Registration is confirmed only after payment.</p>
+                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">Registration Fee: ₹{totalFee} Only</h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">Every player must submit ₹{totalFee} during form fill-up. Registration fee is non-refundable. Registration is confirmed only after payment.</p>
                 </div>
               </div>
 
@@ -89,8 +94,8 @@ export const InfoModal = ({ onClose }: { onClose: () => void }) => {
                   <i className="fa-solid fa-credit-card text-brand-primary"></i>
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">রেজিস্ট্রেশন ফি: ₹১০০ মাত্র</h4>
-                  <p className="text-xs text-slate-600 font-medium leading-relaxed">প্রত্যেক Player কে Form Fill-Up এর সময় ₹১০০ Registration Fee জমা দিতে হবে। Registration Fee অফেরতযোগ্য। পেমেন্টের পরই রেজিস্ট্রেশন নিশ্চিত হবে।</p>
+                  <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs mb-1">রেজিস্ট্রেশন ফি: ₹{toBengaliDigits(totalFee)} মাত্র</h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">প্রত্যেক Player কে Form Fill-Up এর সময় ₹{toBengaliDigits(totalFee)} Registration Fee জমা দিতে হবে। Registration Fee অফেরতযোগ্য। পেমেন্টের পরই রেজিস্ট্রেশন নিশ্চিত হবে।</p>
                 </div>
               </div>
 

@@ -6,22 +6,30 @@ import { FaUsers, FaMoneyBillWave, FaCalendarCheck, FaClock, FaTrophy } from 're
 export default async function AdminDashboard() {
   const supabase = await createClient()
   
-  // Fetch stats
+  // Fetch stats - only successful payments
   const { count: totalPlayers } = await supabase
     .from('players')
     .select('*', { count: 'exact', head: true })
+    .eq('payment_status', 'Success')
 
   const { data: recentPlayers } = await supabase
     .from('players')
     .select('full_name, primary_role, created_at')
+    .eq('payment_status', 'Success')
     .order('created_at', { ascending: false })
     .limit(5)
 
   const { data: revenueData } = await supabase
     .from('players')
-    .select('payment_amount');
+    .select('payment_amount')
+    .eq('payment_status', 'Success');
   
   const revenue = revenueData?.reduce((acc, player) => acc + (player.payment_amount || 0), 0) || 0;
+  
+  const { count: pendingPlayers } = await supabase
+    .from('players')
+    .select('*', { count: 'exact', head: true })
+    .eq('payment_status', 'PENDING')
 
 
   return (
@@ -36,13 +44,11 @@ export default async function AdminDashboard() {
           title="Total Registrations" 
           value={totalPlayers || 0} 
           icon={<FaUsers size={24} />} 
-          trend={{ value: '+12%', positive: true }}
         />
         <StatCard 
           title="Total Revenue" 
           value={`₹${revenue}`} 
           icon={<FaMoneyBillWave size={24} />} 
-          trend={{ value: '+8%', positive: true }}
         />
         <StatCard 
           title="Completed Games" 
@@ -50,8 +56,8 @@ export default async function AdminDashboard() {
           icon={<FaCalendarCheck size={24} />} 
         />
         <StatCard 
-          title="Pending Requests" 
-          value="0" 
+          title="Pending Payments" 
+          value={pendingPlayers || 0} 
           icon={<FaClock size={24} />} 
         />
       </div>

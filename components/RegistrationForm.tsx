@@ -393,7 +393,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
         {/* Modals */}
         <AnimatePresence>
           {showPolicy && <PolicyModal onClose={() => setShowPolicy(false)} />}
-          {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+          {showInfo && <InfoModal onClose={() => setShowInfo(false)} totalFee={totalFeeAmount} />}
         </AnimatePresence>
 
         <GlobalFooter />
