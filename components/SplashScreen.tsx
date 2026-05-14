@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 export const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -28,8 +29,8 @@ export const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       <div className="perspective-container mb-8">
         <div className="coin">
           {/* Heads (Trophy) */}
-          <div className="coin-face">
-            <i className="fa-solid fa-trophy text-5xl text-yellow-900 drop-shadow-sm"></i>
+          <div className="coin-face overflow-hidden">
+            <Image src="/logo.png" alt="Logo" width={96} height={96} className="w-full h-full object-cover" />
           </div>
           {/* Tails (Year) */}
           <div className="coin-face coin-back">

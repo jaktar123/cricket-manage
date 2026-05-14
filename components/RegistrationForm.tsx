@@ -1,33 +1,74 @@
 "use client";
 
 import React, { useState } from "react";
-import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import { Step1Personal } from "./Step1Personal";
 import { Step2Kit } from "./Step2Kit";
 import { Step2Payment } from "./Step2Payment";
 import { PolicyModal } from "./PolicyModal";
 import { InfoModal } from "./InfoModal";
-import { SuccessScreen } from "./SuccessScreen";
-import { RegistrationData } from "@/lib/types";
 
-interface RazorpayResponse {
-  razorpay_payment_id: string;
-  razorpay_order_id: string;
-  razorpay_signature: string;
-}
+import { RegistrationData } from "@/lib/types";
+import { GlobalFooter } from "./GlobalFooter";
+import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
+import { useLanguage } from "./providers/LanguageProvider";
+import Image from "next/image";
+
+
 
 type Props = {
   onBackToIntro: () => void;
 };
 
 export const RegistrationForm = ({ onBackToIntro }: Props) => {
+  const { t } = useLanguage();
   const [step, setStep] = useState(1);
   const [showPolicy, setShowPolicy] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentId, setPaymentId] = useState("");
+
+
+  const [feeStructure, setFeeStructure] = useState<{name: string, amount: number}[]>([]);
+  const [isFeeLoading, setIsFeeLoading] = useState(true);
+  const [feeError, setFeeError] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    const fetchFee = async () => {
+      setIsFeeLoading(true);
+      setFeeError(null);
+      try {
+        const { data, error } = await supabase
+          .from('global_settings')
+          .select('value')
+          .ilike('key', 'registration_fee%')
+          .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data) {
+          const parsed = JSON.parse(data.value);
+          if (Array.isArray(parsed)) {
+            setFeeStructure(parsed);
+          } else {
+            setFeeStructure([{ name: "Registration Fee", amount: parseInt(data.value) || 0 }]);
+          }
+        } else {
+          throw new Error("Registration fee setting not found in database.");
+        }
+      } catch (err) {
+        console.error("Error fetching fee:", err);
+        setFeeError("Critical Error: Could not retrieve registration fee. Registration is disabled. Please contact admin.");
+      } finally {
+        setIsFeeLoading(false);
+      }
+    };
+    fetchFee();
+  }, []);
+
+
+  const totalFeeAmount = feeStructure.reduce((acc, item) => acc + item.amount, 0);
 
   const [formData, setFormData] = useState<RegistrationData>({
     fullName: "",
@@ -45,7 +86,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
 
   const handleContinue = () => {
     if (step === 1) {
-      if (!formData.fullName || !formData.age || !formData.mobile || !formData.photoUrl) {
+      if (!formData.fullName || !formData.age || !formData.mobile || !formData.email || !formData.photoUrl) {
         alert("Please fill all required fields and upload a photo.");
         return;
       }
@@ -55,6 +96,16 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
       }
       if (formData.mobile.length !== 10) {
         alert("Mobile number must be exactly 10 digits.");
+        return;
+      }
+      const ageNum = parseInt(formData.age);
+      if (isNaN(ageNum) || ageNum < 10 || ageNum > 60) {
+        alert("Age must be between 10 and 60.");
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        alert("Please enter a valid email address.");
         return;
       }
       setStep(2);
@@ -78,60 +129,64 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (totalFeeAmount <= 0) {
+      alert("Invalid registration fee. Please refresh the page.");
+      return;
+    }
+
     setIsSubmitting(true);
 
+
     try {
-      const res = await fetch("/api/create-order", { method: "POST" });
-      const { orderId, error: orderError } = await res.json();
+      // 1. Insert player data into Supabase 'players' table with payment_status: 'PENDING'
+      const { data, error } = await supabase
+        .from("players")
+        .insert([
+          {
+            full_name: formData.fullName,
+            age: parseInt(formData.age),
+            mobile: formData.mobile,
+            email: formData.email,
+            primary_role: formData.role,
+            batting_style: formData.battingStyle,
+            bowling_style: formData.bowlingStyle,
+            jersey_number: parseInt(formData.jerseyNumber),
+            jersey_size: formData.jerseySize,
+            photo_url: formData.photoUrl,
+            payment_status: "PENDING",
+            payment_amount: totalFeeAmount,
+            expected_amount_paise: totalFeeAmount * 100,
+          },
 
-      if (orderError) throw new Error(orderError);
+        ])
+        .select()
+        .single();
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_YOUR_KEY",
-        amount: 10000,
-        currency: "INR",
-        name: "JUGORE TRIPLE L",
-        description: "Registration Fee - Season 2",
-        order_id: orderId,
-        handler: async (response: RazorpayResponse) => {
-          try {
-            const registerRes = await fetch("/api/register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                ...response,
-                formData,
-                amount: options.amount / 100, // Convert paise to Rupees
-              }),
-            });
+      if (error) throw error;
 
-            const { success, error: regError } = await registerRes.json();
+      // 2. Get the returned id from Supabase
+      const supabaseId = data.id;
 
-            if (regError) throw new Error(regError);
+      // 3. Save this id to the browser's localStorage as 'current_registration_id'
+      localStorage.setItem('current_registration_id', supabaseId);
 
-            if (success) {
-              setPaymentId(response.razorpay_payment_id);
-              setIsSuccess(true);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            alert("Error verifying payment: " + errorMessage);
-          }
-        },
-        prefill: {
-          name: formData.fullName,
-          email: formData.email,
-          contact: formData.mobile,
-        },
-        theme: {
-          color: "#2563eb",
-        },
-      };
+      // 4. Construct a Redirect URL to Razorpay Payment Page
+      const email = formData.email || "";
+      const mobile = formData.mobile || "";
+      const uuid = supabaseId;
+      const currentFeeInRupees = totalFeeAmount;
+      
+      const baseUrl = "https://pages.razorpay.com/jugore";
+      const redirectUrl = `${baseUrl}?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(mobile)}&player_id=${uuid}&amount=${currentFeeInRupees}&callback_url=https://www.jaktar.pro/success`;
 
-      const Razorpay = (window as unknown as { Razorpay: new (options: unknown) => { open: () => void } }).Razorpay;
-      const rzp = new Razorpay(options);
-      rzp.open();
+      console.log("Redirect URL:", redirectUrl);
+
+      // 5. Use window.location.href to send the user there
+      window.location.href = redirectUrl;
+
+
+
     } catch (error) {
       console.error("Error submitting form:", error);
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -141,29 +196,39 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
     }
   };
 
-  if (isSuccess) {
-    return <SuccessScreen formData={formData} paymentId={paymentId} onClose={onBackToIntro} />;
-  }
+
+
 
   return (
     <div id="registrationContainer" className="min-h-screen relative overflow-hidden py-10 px-4">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      
-      {/* Dynamic Background Orbs */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-secondary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
 
+      
       <div className="max-w-3xl mx-auto relative z-10">
+        {/* Back to Home Button - Above Form */}
+        <button
+          onClick={onBackToIntro}
+          className="mb-8 flex items-center gap-2 text-white/40 hover:text-white transition-all group w-fit"
+        >
+          <div className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-all">
+            <i className="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
+          </div>
+          <span className="uppercase tracking-[0.2em] text-[10px] font-black">Back to Home</span>
+        </button>
+
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10 text-white"
         >
-          <div className="inline-block p-4 rounded-3xl bg-white/10 backdrop-blur-xl mb-6 border border-white/20 shadow-2xl premium-shadow">
-            <i className="fa-solid fa-baseball-bat-ball text-5xl text-brand-secondary drop-shadow-[0_0_15px_rgba(255,157,35,0.5)]"></i>
+          <div className="inline-block w-24 h-24 rounded-3xl bg-white/10 backdrop-blur-xl mb-6 border border-white/20 shadow-2xl premium-shadow overflow-hidden">
+            <Image 
+              src="/logo.png" 
+              alt="Logo" 
+              width={96}
+              height={96}
+              className="w-full h-full object-cover" 
+            />
           </div>
           <h1 className="text-5xl font-black tracking-tight mb-2 uppercase italic">
             <span className="text-white">JUGORE</span>{" "}
@@ -236,7 +301,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="glass-effect rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden relative border border-white/40"
+          className="glass-effect rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden relative border border-white/40 mb-20"
         >
           {/* Progress Bar */}
           <div className="h-1.5 bg-white/10 w-full flex relative z-10">
@@ -290,15 +355,38 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Step2Payment
+                   <Step2Payment
                     formData={formData}
                     onBack={handleBack}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
+                    feeStructure={feeStructure}
+                    totalAmount={totalFeeAmount}
+                    isFeeLoading={isFeeLoading}
+                    feeError={feeError}
                   />
+
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Global WhatsApp Support Section */}
+            <div className="mt-12 pt-10 border-t border-slate-100/50 flex flex-col items-center gap-4">
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                {t("helpTitle")}
+              </p>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                href="https://wa.me/919907434605"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-[#25D366]/20 group"
+              >
+                <i className="fa-brands fa-whatsapp text-lg group-hover:rotate-12 transition-transform"></i>
+                <span>{t("btnChat")}</span>
+              </motion.a>
+            </div>
           </div>
         </motion.div>
 
@@ -308,19 +396,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
           {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
         </AnimatePresence>
 
-        {/* Footer */}
-        <div className="mt-12 pb-12 px-6 flex flex-col md:flex-row items-center justify-between text-blue-100/60 text-sm">
-          <div className="text-center md:text-left font-medium">
-            &copy; 2026 Triple L (Season-2). All rights reserved.
-          </div>
-          <div className="mt-4 md:mt-0 font-bold tracking-widest flex items-center justify-center md:justify-end gap-3 uppercase">
-            Developed by <span className="text-yellow-400">JAMIL</span>
-            <div className="relative w-10 h-10 flex items-center justify-center group cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-tr from-yellow-600 via-yellow-400 to-yellow-200 rotate-45 rounded-xl shadow-lg border border-white/20 group-hover:rotate-[225deg] transition-all duration-1000 ease-in-out"></div>
-              <span className="relative z-10 text-blue-900 font-black text-xs scale-110">JA</span>
-            </div>
-          </div>
-        </div>
+        <GlobalFooter />
       </div>
     </div>
   );

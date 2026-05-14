@@ -17,7 +17,12 @@ export default async function AdminDashboard() {
     .order('created_at', { ascending: false })
     .limit(5)
 
-  const revenue = (totalPlayers || 0) * 100 // 100 INR per player
+  const { data: revenueData } = await supabase
+    .from('players')
+    .select('payment_amount');
+  
+  const revenue = revenueData?.reduce((acc, player) => acc + (player.payment_amount || 0), 0) || 0;
+
 
   return (
     <div className="space-y-10">

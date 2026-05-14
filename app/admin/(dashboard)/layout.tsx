@@ -2,7 +2,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { FaUsers, FaChartBar, FaSignOutAlt, FaTrophy } from 'react-icons/fa'
+import { FaUsers, FaChartBar, FaSignOutAlt, FaCog } from 'react-icons/fa'
+import Image from 'next/image'
 
 export default async function AdminLayout({
   children,
@@ -21,10 +22,10 @@ export default async function AdminLayout({
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col">
         <div className="flex items-center gap-3 mb-10 px-2">
-          <div className="bg-blue-600 p-2 rounded-lg text-white">
-            <FaTrophy size={20} />
+          <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-700">
+            <Image src="/logo.png" alt="JTL" width={40} height={40} className="w-full h-full object-cover" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">Admin Panel</span>
+          <span className="text-2xl font-black text-white tracking-tighter">JTL</span>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -41,6 +42,13 @@ export default async function AdminLayout({
           >
             <FaUsers size={18} />
             <span>Players</span>
+          </Link>
+          <Link 
+            href="/admin/config" 
+            className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-all"
+          >
+            <FaCog size={18} />
+            <span>Config</span>
           </Link>
         </nav>
 

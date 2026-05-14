@@ -1,11 +1,25 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { RegistrationData } from '@/lib/types'
 
+export async function updateGlobalSetting(key: string, value: string) {
+  const supabase = createAdminClient()
+  
+  const { error } = await supabase
+    .from('global_settings')
+    .upsert({ key, value }, { onConflict: 'key' })
+
+  if (error) throw new Error(error.message)
+  
+  revalidatePath('/admin/config')
+  revalidatePath('/')
+}
+
 export async function updatePlayer(id: string, formData: RegistrationData) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
+
   
   const { error } = await supabase
     .from('players')
@@ -29,7 +43,8 @@ export async function updatePlayer(id: string, formData: RegistrationData) {
 }
 
 export async function deletePlayer(id: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
+
   
   const { error } = await supabase
     .from('players')

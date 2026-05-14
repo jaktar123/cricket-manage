@@ -1,11 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SplashScreen } from "@/components/SplashScreen";
 import { IntroScreen } from "@/components/IntroScreen";
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<"splash" | "intro" | "registration">("splash");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname === "jaktar.pro") {
+      window.location.href = "https://www.jaktar.pro" + window.location.pathname + window.location.search;
+    }
+  }, []);
+
 
   return (
     <main

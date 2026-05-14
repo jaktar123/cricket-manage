@@ -6,6 +6,9 @@ import { LanguageProvider } from "@/components/providers/LanguageProvider";
 export const metadata: Metadata = {
   title: "Jugore Triple L Registration",
   description: "Tournament Registration portal for Jugore Triple L - Season 2",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

@@ -2,27 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { GlobalFooter } from "./GlobalFooter";
+import Image from "next/image";
 
 export const IntroScreen = () => {
   const router = useRouter();
-  const [isBallVisible, setIsBallVisible] = useState(false);
-  const [isTitleCracked, setIsTitleCracked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Fade in intro page
     const timer = setTimeout(() => {
       setIsVisible(true);
-      // Trigger title hit animation after fade in
-      setTimeout(() => {
-        setIsBallVisible(true);
-        setTimeout(() => {
-          setIsTitleCracked(true);
-        }, 1500); // Crack when ball hits
-        setTimeout(() => {
-          setIsBallVisible(false);
-        }, 3100); // Hide ball after it flies away
-      }, 1000);
     }, 100);
 
     return () => clearTimeout(timer);
@@ -38,16 +28,17 @@ export const IntroScreen = () => {
       {/* Decorative Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500 rounded-full blur-[150px] opacity-20"></div>
 
-      {/* Striking Ball Animation */}
-      {isBallVisible && <div id="introBall" className="anim-title-ball"></div>}
-
       <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10 animate-fade-in space-y-8 py-16">
         {/* Icon: Trophy */}
-        <div className="inline-block p-6 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-500">
-          <i
-            id="introTrophy"
-            className="fa-solid fa-trophy text-6xl text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] animate-trophy-spin"
-          ></i>
+        <div className="inline-block w-32 h-32 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-500 overflow-hidden">
+          <Image
+            id="introLogo"
+            src="/logo.png"
+            alt="Logo"
+            width={128}
+            height={128}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         {/* Title */}
@@ -57,9 +48,7 @@ export const IntroScreen = () => {
           </h2>
           <h1
             id="mainTitle"
-            className={`text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter transition-all duration-100 ${
-              isTitleCracked ? "anim-crack-active" : ""
-            }`}
+            className="text-5xl md:text-7xl font-black text-white leading-tight tracking-tighter"
           >
             JUGORE<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-300">
@@ -106,9 +95,9 @@ export const IntroScreen = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <a 
                 href="tel:+919907434605" 
-                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border-2 border-brand-primary/40 px-6 py-4 rounded-2xl transition-all group backdrop-blur-xl shadow-2xl hover:shadow-brand-primary/20"
+                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-4 rounded-2xl transition-all group backdrop-blur-2xl shadow-2xl hover:shadow-brand-primary/20"
               >
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
                   <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
                 </div>
                 <div className="text-left">
@@ -119,9 +108,9 @@ export const IntroScreen = () => {
               
               <a 
                 href="tel:+916294979597" 
-                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border-2 border-brand-primary/40 px-6 py-4 rounded-2xl transition-all group backdrop-blur-xl shadow-2xl hover:shadow-brand-primary/20"
+                className="flex items-center justify-center gap-4 bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-4 rounded-2xl transition-all group backdrop-blur-2xl shadow-2xl hover:shadow-brand-primary/20"
               >
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
                   <i className="fa-solid fa-phone text-emerald-400 group-hover:rotate-12 transition-transform"></i>
                 </div>
                 <div className="text-left">
@@ -150,15 +139,7 @@ export const IntroScreen = () => {
       </div>
 
       {/* Footer */}
-      <div className="relative z-20 pb-10 flex flex-col items-center gap-2 mt-auto">
-        <div className="text-white/30 text-xs">Powered by Triple L</div>
-        <button 
-          onClick={() => router.push('/admin')}
-          className="text-white/40 text-[11px] underline hover:text-white/80 transition-colors uppercase tracking-[0.2em] font-black mt-1"
-        >
-          Admin Panel
-        </button>
-      </div>
+      <GlobalFooter />
     </div>
   );
 };

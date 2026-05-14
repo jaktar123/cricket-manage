@@ -22,10 +22,10 @@ export const InfoModal = ({ onClose }: { onClose: () => void }) => {
           </div>
           <button
             onClick={toggleLanguage}
-            className="text-[10px] bg-white text-brand-primary px-4 py-2 rounded-xl border-2 border-brand-accent transition flex items-center gap-2 shadow-sm font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white"
+            className="text-[10px] bg-white text-brand-primary px-4 py-2 rounded-xl border-2 border-brand-accent transition flex items-center gap-2 shadow-sm font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white group"
           >
-            <i className="fa-solid fa-language text-lg"></i>
-            <span>{t("langBtnText")}</span>
+            <i className="fa-solid fa-language text-lg group-hover:text-white transition-colors"></i>
+            <span className="group-hover:text-white transition-colors">{t("langBtnText")}</span>
           </button>
         </h2>
 

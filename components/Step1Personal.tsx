@@ -21,6 +21,14 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    if (name === "mobile") {
+      // Only allow digits and max 10 characters
+      const cleaned = value.replace(/\D/g, '').substring(0, 10);
+      setFormData((prev: RegistrationData) => ({ ...prev, [name]: cleaned }));
+      return;
+    }
+
     setFormData((prev: RegistrationData) => ({ ...prev, [name]: value }));
   };
 
@@ -64,7 +72,12 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
   const isStep1Valid = !!(
     formData.fullName && 
     formData.age && 
+    parseInt(formData.age) >= 10 &&
+    parseInt(formData.age) <= 60 &&
     formData.mobile && 
+    formData.mobile.length === 10 &&
+    formData.email &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
     formData.photoUrl && 
     formData.rulesAccepted
   );
@@ -85,10 +98,10 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
         <button
           type="button"
           onClick={toggleLanguage}
-          className="self-start sm:self-center px-4 py-2 rounded-xl bg-white border-2 border-brand-accent text-brand-primary hover:bg-brand-primary hover:text-white transition-all duration-300 flex items-center gap-2 text-sm font-black uppercase tracking-widest shadow-sm"
+          className="self-start sm:self-center px-4 py-2 rounded-xl bg-white border-2 border-brand-accent text-brand-primary hover:bg-brand-primary hover:text-white transition-all duration-300 flex items-center gap-2 text-sm font-black uppercase tracking-widest shadow-sm group"
         >
-          <i className="fa-solid fa-language text-lg"></i>
-          <span>{t("langBtnText")}</span>
+          <i className="fa-solid fa-language text-lg group-hover:text-white transition-colors"></i>
+          <span className="group-hover:text-white transition-colors">{t("langBtnText")}</span>
         </button>
       </div>
 
@@ -96,19 +109,19 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[
           { name: "fullName", icon: "fa-user", label: t("labelFullName"), placeholder: t("placeholderFullName"), type: "text" },
-          { name: "age", icon: "fa-cake-candles", label: t("labelAge"), placeholder: "e.g. 24", type: "number", min: 10, max: 99 },
-          { name: "mobile", icon: "fa-mobile-screen", label: t("labelMobile"), placeholder: t("placeholderMobile"), type: "tel", pattern: "[0-9]{10}" },
-          { name: "email", icon: "fa-envelope", label: `${t("labelEmailMain")} (Optional)`, placeholder: t("placeholderEmail"), type: "email" },
+          { name: "age", icon: "fa-cake-candles", label: t("labelAge"), placeholder: "e.g. 24", type: "number", min: 10, max: 60 },
+          { name: "mobile", icon: "fa-phone", label: t("labelMobile"), placeholder: t("placeholderMobile"), type: "tel", pattern: "[0-9]{10}", inputMode: "numeric" as const },
+          { name: "email", icon: "fa-envelope", label: t("labelEmailMain"), placeholder: t("placeholderEmail"), type: "email" },
         ].map((field) => (
           <div key={field.name} className="flex flex-col">
             <label className={labelHeaderClasses}>{field.label}</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-                <i className={`fa-regular ${field.icon} text-brand-primary transition-colors text-lg`}></i>
+                <i className={`fa-solid ${field.icon} text-brand-primary transition-colors text-lg`}></i>
               </div>
               <input
                 {...field}
-                required={field.name !== "email"}
+                required
                 value={formData[field.name as keyof RegistrationData] as string}
                 onChange={handleChange}
                 className={inputClasses}
@@ -128,7 +141,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
           <h3 className="text-xl font-bold text-slate-900">{t("photoTitle")}</h3>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-10 bg-white p-8 rounded-[2.5rem] border-2 border-brand-accent">
+        <div className="flex flex-col md:flex-row items-center gap-10 bg-white p-8 rounded-[2.5rem] border-2 border-brand-secondary">
           <div className="relative group">
             <div className={`w-48 h-48 rounded-[3rem] border-4 ${formData.photoUrl ? 'border-brand-primary' : 'border-slate-100'} shadow-2xl bg-slate-50 flex items-center justify-center overflow-hidden relative transition-all duration-500 group-hover:scale-105`}>
               {formData.photoUrl ? (
@@ -163,8 +176,8 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
                   htmlFor="photo-upload"
                   className="flex items-center justify-center gap-3 w-full px-8 py-5 rounded-2xl bg-white border-2 border-brand-accent text-brand-primary font-black uppercase tracking-widest text-xs hover:bg-brand-primary hover:text-white transition-all duration-300 cursor-pointer shadow-sm group"
                 >
-                  <i className="fa-solid fa-cloud-arrow-up text-lg"></i>
-                  <span>{formData.photoUrl ? "Change Photo" : "Select Photo"}</span>
+                  <i className="fa-solid fa-cloud-arrow-up text-lg group-hover:text-white transition-colors"></i>
+                  <span className="group-hover:text-white transition-colors">{formData.photoUrl ? "Change Photo" : "Select Photo"}</span>
                 </label>
               </div>
             </div>
@@ -229,16 +242,16 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-10 border-t border-slate-100">
+      <div className="flex flex-row items-center justify-between pt-10 border-t border-slate-100 gap-2">
         <button
           type="button"
           onClick={onBack}
-          className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
+          className="group flex items-center gap-2 px-4 sm:px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
         >
-          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors shrink-0">
             <i className="fa-solid fa-arrow-left"></i>
           </div>
-          <span>{t("btnBack1")}</span>
+          <span className="truncate">{t("btnBack1")}</span>
         </button>
         
         <motion.button
@@ -247,7 +260,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
           type="button"
           disabled={!isStep1Valid}
           onClick={onContinue}
-          className={`flex items-center gap-4 px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all duration-300 group ${
+          className={`flex items-center justify-center gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-[2rem] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[10px] sm:text-xs transition-all duration-300 group shrink-0 ${
             isStep1Valid 
               ? "bg-brand-primary text-white shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110" 
               : "bg-slate-200 text-slate-400 border-2 border-slate-300 cursor-not-allowed opacity-70"

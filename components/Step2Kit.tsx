@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "./providers/LanguageProvider";
 import { RegistrationData } from "@/lib/types";
+import Image from "next/image";
 
 type Props = {
   formData: RegistrationData;
@@ -49,7 +50,7 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/20">
-            <i className="fa-solid fa-trophy text-white text-xl"></i>
+            <i className="fa-solid fa-shirt text-white text-xl"></i>
           </div>
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">{t("kitSelectionTitle")}</h2>
@@ -66,10 +67,10 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { value: "Batsman", label: t("roleBatsman"), icon: "fa-person-running" },
-              { value: "Bowler", label: t("roleBowler"), icon: "fa-baseball" },
-              { value: "All-Rounder", label: t("roleAllRounder"), icon: "fa-medal" },
-              { value: "Wicket Keeper", label: t("roleKeeper"), icon: "fa-hands" },
+              { value: "Batsman", label: t("roleBatsman"), image: "/assets/svgs/cricket-helmet.svg" },
+              { value: "Bowler", label: t("roleBowler"), image: "/assets/svgs/cricket-ball.svg" },
+              { value: "All-Rounder", label: t("roleAllRounder"), image: "/assets/svgs/badge.svg" },
+              { value: "Wicket Keeper", label: t("roleKeeper"), image: "/assets/svgs/cricket-wicket.svg" },
             ].map((role) => (
               <motion.div
                 key={role.value}
@@ -82,10 +83,18 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
                     : "border-slate-100 bg-slate-50/50 hover:border-brand-primary"
                 }`}
               >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 overflow-hidden ${
                   formData.role.includes(role.value) ? "bg-brand-primary text-white scale-110 shadow-lg" : "bg-white text-brand-primary group-hover:text-brand-primary"
                 }`}>
-                  <i className={`fa-solid ${role.icon} text-2xl`}></i>
+                  <Image 
+                    src={role.image} 
+                    alt={role.label} 
+                    width={40}
+                    height={40}
+                    className={`w-10 h-10 object-contain transition-all duration-500 ${
+                      formData.role.includes(role.value) ? "brightness-0 invert" : "brightness-0 saturate-100 invert-[0.3] sepia-[1] hue-rotate-[70deg] brightness-[0.8]"
+                    }`} 
+                  />
                 </div>
                 <span className={`text-sm font-black uppercase tracking-tight ${
                   formData.role.includes(role.value) ? "text-brand-primary" : "text-slate-600"
@@ -224,16 +233,16 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-10 border-t border-slate-100">
+      <div className="flex flex-row items-center justify-between pt-10 border-t border-slate-100 gap-2">
         <button
           type="button"
           onClick={onBack}
-          className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
+          className="group flex items-center gap-2 px-4 sm:px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
         >
-          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors">
+          <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors shrink-0">
             <i className="fa-solid fa-arrow-left"></i>
           </div>
-          <span>{t("btnBack1")}</span>
+          <span className="truncate">{t("btnBack1")}</span>
         </button>
         
         <motion.button
@@ -241,7 +250,7 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
           whileTap={{ scale: 0.95 }}
           type="button"
           onClick={onContinue}
-          className="flex items-center gap-4 px-10 py-5 rounded-[2rem] bg-brand-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110 transition-all duration-300 group"
+          className="flex items-center justify-center gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-[2rem] bg-brand-primary text-white font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[10px] sm:text-xs shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110 transition-all duration-300 group shrink-0"
         >
           <span>{t("btnContinue")}</span>
           <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>

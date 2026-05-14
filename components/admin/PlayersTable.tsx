@@ -22,6 +22,8 @@ interface Player {
   payment_status: string
   created_at: string
   photo_url?: string
+  payment_amount: number
+  razorpay_payment_id?: string
 }
 
 const EXPORT_COLUMNS = [
@@ -268,7 +270,9 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
               <th className="px-6 py-4 text-slate-400 font-medium text-sm">Role</th>
               <th className="px-6 py-4 text-slate-400 font-medium text-sm">Contact</th>
               <th className="px-6 py-4 text-slate-400 font-medium text-sm">Status</th>
+              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Amount</th>
               <th className="px-6 py-4 text-slate-400 font-medium text-sm text-right">Actions</th>
+
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
@@ -308,7 +312,14 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
                   <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
                     {player.payment_status}
                   </span>
+                  {player.razorpay_payment_id && (
+                    <p className="text-[9px] text-slate-500 mt-1 font-mono">{player.razorpay_payment_id}</p>
+                  )}
                 </td>
+                <td className="px-6 py-4 text-slate-300 text-sm font-bold">
+                  ₹{player.payment_amount}
+                </td>
+
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <button 
@@ -398,6 +409,15 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
                   <p className="text-slate-500 mb-1">Registration Date</p>
                   <p className="text-white font-medium">{new Date(selectedPlayer.created_at).toLocaleString()}</p>
                 </div>
+                <div>
+                  <p className="text-slate-500 mb-1">Payment ID</p>
+                  <p className="text-white font-mono text-xs">{selectedPlayer.razorpay_payment_id || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 mb-1">Amount Paid</p>
+                  <p className="text-emerald-500 font-black text-lg">₹{selectedPlayer.payment_amount}</p>
+                </div>
+
               </div>
             </div>
           </div>
