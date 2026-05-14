@@ -45,6 +45,7 @@ const EXPORT_COLUMNS = [
 export default function PlayersTable({ players: initialPlayers }: { players: Player[] }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('All')
+  const [paymentFilter, setPaymentFilter] = useState('All')
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
@@ -57,7 +58,8 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
       const matchesSearch = player.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            player.mobile.includes(searchTerm)
       const matchesRole = roleFilter === 'All' || player.primary_role === roleFilter
-      return matchesSearch && matchesRole
+      const matchesPayment = paymentFilter === 'All' || player.payment_status === paymentFilter
+      return matchesSearch && matchesRole && matchesPayment
     })
     .sort((a, b) => {
       if (sortBy === 'newest') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -196,59 +198,83 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
-      <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+      <div className="p-4 md:p-6 border-b border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row flex-1 items-stretch md:items-center gap-4">
+          <div className="relative flex-1">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
-              placeholder="Search by name or mobile..."
+              placeholder="Search players..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
             />
           </div>
-          <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-slate-800/50 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none min-w-[140px]"
-            >
-              <option value="All">All Roles</option>
-              <option value="Batsman">Batsman</option>
-              <option value="Bowler">Bowler</option>
-              <option value="All Rounder">All Rounder</option>
-              <option value="Wicket Keeper">Wicket Keeper</option>
-            </select>
-          </div>
-          <div className="relative">
-            <FaSortAmountDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-slate-800/50 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none min-w-[140px]"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="age_asc">Age (Low-High)</option>
-              <option value="age_desc">Age (High-Low)</option>
-            </select>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1 sm:min-w-[160px]">
+              <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none transition-all cursor-pointer"
+              >
+                <option value="All">All Roles</option>
+                <option value="Batsman">Batsman</option>
+                <option value="Bowler">Bowler</option>
+                <option value="All Rounder">All Rounder</option>
+                <option value="Wicket Keeper">Wicket Keeper</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+            <div className="relative flex-1 sm:min-w-[160px]">
+              <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <select
+                value={paymentFilter}
+                onChange={(e) => setPaymentFilter(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none transition-all cursor-pointer"
+              >
+                <option value="All">All Payments</option>
+                <option value="Success">Paid</option>
+                <option value="PENDING">Pending</option>
+                <option value="Failed">Failed</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+            <div className="relative flex-1 sm:min-w-[160px]">
+              <FaSortAmountDown className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none transition-all cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="age_asc">Age (Low-High)</option>
+                <option value="age_desc">Age (High-Low)</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button 
             onClick={exportToCSV}
-            className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition-all text-sm border border-slate-700"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-all text-sm border border-slate-700 active:scale-95"
           >
-            <FaDownload size={12} className="text-blue-400" />
+            <FaDownload size={14} className="text-blue-400" />
             <span>CSV</span>
           </button>
           <button 
             onClick={() => setIsExportModalOpen(true)}
             disabled={loading}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all text-sm shadow-lg shadow-blue-900/20 disabled:opacity-50"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-all text-sm shadow-lg shadow-blue-900/20 disabled:opacity-50 active:scale-95"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -262,28 +288,26 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
 
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-slate-800/50 border-b border-slate-700">
+          <thead className="bg-slate-800/50 border-b border-slate-800">
             <tr>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">S.No</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Photo</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Player Name</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Role</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Contact</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Status</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm">Amount</th>
-              <th className="px-6 py-4 text-slate-400 font-medium text-sm text-right">Actions</th>
-
+              <th className="hidden sm:table-cell px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">S.No</th>
+              <th className="hidden md:table-cell px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Photo</th>
+              <th className="px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Player</th>
+              <th className="hidden sm:table-cell px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Role</th>
+              <th className="hidden lg:table-cell px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Contact</th>
+              <th className="px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Status</th>
+              <th className="hidden md:table-cell px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider">Amount</th>
+              <th className="px-6 py-4 text-slate-400 font-semibold text-xs uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800">
+          <tbody className="divide-y divide-slate-800/50">
             {filteredPlayers.map((player) => (
-              <tr key={player.id} className="hover:bg-slate-800/30 transition-colors">
-                <td className="px-6 py-4 text-slate-300 text-sm font-medium">
-                  {/* Serial number based on registration time (total - index since we show newest first) */}
+              <tr key={player.id} className="hover:bg-slate-800/40 transition-colors group">
+                <td className="hidden sm:table-cell px-6 py-4 text-slate-500 text-sm font-medium">
                   {initialPlayers.length - initialPlayers.findIndex(p => p.id === player.id)}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-slate-700 flex-shrink-0">
+                <td className="hidden md:table-cell px-6 py-4">
+                  <div className="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-slate-700 flex-shrink-0 group-hover:border-blue-500/50 transition-colors">
                     {player.photo_url ? (
                       <Image 
                         src={player.photo_url} 
@@ -294,55 +318,61 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
                         unoptimized
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-blue-500 font-bold bg-blue-600/10">
+                      <div className="w-full h-full flex items-center justify-center text-blue-500 font-bold bg-blue-600/10 uppercase">
                         {player.full_name.charAt(0)}
                       </div>
                     )}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-white font-medium">{player.full_name}</span>
+                  <div className="flex flex-col">
+                    <span className="text-white font-semibold group-hover:text-blue-400 transition-colors">{player.full_name}</span>
+                    <span className="sm:hidden text-slate-500 text-[10px] mt-0.5">{player.primary_role}</span>
+                  </div>
                 </td>
-                <td className="px-6 py-4 text-slate-300 text-sm">{player.primary_role}</td>
-                <td className="px-6 py-4">
+                <td className="hidden sm:table-cell px-6 py-4 text-slate-300 text-sm">{player.primary_role}</td>
+                <td className="hidden lg:table-cell px-6 py-4">
                   <p className="text-white text-sm">{player.mobile}</p>
                   <p className="text-slate-500 text-xs">{player.email}</p>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                     player.payment_status === 'Success' 
-                      ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+                      ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
                       : player.payment_status === 'PENDING'
                       ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                      : 'bg-red-500/10 text-red-500 border-red-500/20'
+                      : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                   }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                      player.payment_status === 'Success' ? 'bg-emerald-500' : player.payment_status === 'PENDING' ? 'bg-amber-500' : 'bg-rose-500'
+                    }`}></span>
                     {player.payment_status}
                   </span>
-                  {player.razorpay_payment_id && (
-                    <p className="text-[9px] text-slate-500 mt-1 font-mono">{player.razorpay_payment_id}</p>
-                  )}
                 </td>
-                <td className="px-6 py-4 text-slate-300 text-sm font-bold">
+                <td className="hidden md:table-cell px-6 py-4 text-slate-300 text-sm font-bold">
                   ₹{player.payment_amount}
                 </td>
 
                 <td className="px-6 py-4 text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-1 sm:gap-2">
                     <button 
                       onClick={() => { setSelectedPlayer(player); setIsViewModalOpen(true); }}
-                      className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
+                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
+                      title="View Details"
                     >
                       <FaEye size={16} />
                     </button>
                     <button 
                       onClick={() => { setSelectedPlayer(player); setIsEditModalOpen(true); }}
-                      className="p-2 text-slate-400 hover:text-green-500 transition-colors"
+                      className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all"
+                      title="Edit Player"
                     >
                       <FaEdit size={16} />
                     </button>
                     <button 
                       onClick={() => handleDelete(player.id)}
-                      className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                      className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
+                      title="Delete Player"
                     >
                       <FaTrash size={16} />
                     </button>
