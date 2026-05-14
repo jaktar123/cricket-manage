@@ -200,7 +200,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
 
 
   return (
-    <div id="registrationContainer" className="min-h-screen relative overflow-hidden py-10 px-4">
+    <div id="registrationContainer" className="min-h-screen relative overflow-hidden py-6 sm:py-10 px-2 sm:px-4">
 
       
       <div className="max-w-3xl mx-auto relative z-10">
@@ -249,7 +249,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
             className="mb-8"
           >
             {/* Consolidated Rules Container (Moved Outside) */}
-            <div className="bg-[#FAF9F6] border-2 border-[#EADBC8]/50 rounded-[2.5rem] p-6 space-y-6 shadow-2xl premium-shadow relative overflow-hidden">
+            <div className="bg-[#FAF9F6] border-2 border-[#EADBC8]/50 rounded-[2.5rem] p-4 sm:p-6 space-y-6 shadow-2xl premium-shadow relative overflow-hidden">
               {/* Subtle texture overlay */}
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
               
@@ -313,7 +313,7 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
             ></motion.div>
           </div>
 
-          <div className="p-8 md:p-12 relative z-10 pt-16">
+          <div className="p-4 sm:p-8 md:p-12 relative z-10 pt-10 sm:pt-16">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div

@@ -77,7 +77,7 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
                 whileHover={{ y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleRoleToggle(role.value)}
-                className={`cursor-pointer group relative overflow-hidden rounded-3xl p-6 flex flex-col items-center gap-4 text-center transition-all duration-500 border-2 ${
+                className={`cursor-pointer group relative overflow-hidden rounded-3xl p-3 sm:p-6 flex flex-col items-center gap-4 text-center transition-all duration-500 border-2 ${
                   formData.role.includes(role.value)
                     ? "border-brand-accent bg-brand-primary/5 shadow-xl shadow-brand-primary/10"
                     : "border-slate-100 bg-slate-50/50 hover:border-brand-primary"
@@ -159,7 +159,7 @@ export const Step2Kit = ({ formData, setFormData, onContinue, onBack }: Props) =
       {/* Jersey Selection Section */}
       <div className="relative group">
         <div className="absolute inset-0 bg-slate-900 rounded-[3rem] transform rotate-1 group-hover:rotate-0 transition-transform duration-500"></div>
-        <div className="relative bg-slate-900 rounded-[3rem] p-8 md:p-10 border border-slate-800 overflow-hidden shadow-2xl">
+        <div className="relative bg-slate-900 rounded-[3rem] p-4 sm:p-8 md:p-10 border border-slate-800 overflow-hidden shadow-2xl">
           <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-brand-primary/20 rounded-full blur-[80px]"></div>
           <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] bg-brand-secondary/10 rounded-full blur-[80px]"></div>
 

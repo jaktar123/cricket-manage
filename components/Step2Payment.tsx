@@ -53,7 +53,7 @@ export const Step2Payment = ({
         className="relative group"
       >
         <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-        <div className="relative bg-white rounded-[2.5rem] p-8 border border-slate-100 flex flex-col md:flex-row items-center gap-8 overflow-hidden">
+        <div className="relative bg-white rounded-[2.5rem] p-4 sm:p-8 border border-slate-100 flex flex-col md:flex-row items-center gap-8 overflow-hidden">
           {/* Holographic Pattern Background */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/5 rounded-bl-[5rem] pointer-events-none"></div>
           
@@ -111,7 +111,7 @@ export const Step2Payment = ({
 
       {/* Payment Information Section */}
       <div className="bg-white rounded-[2.5rem] border-2 border-brand-secondary overflow-hidden shadow-sm">
-        <div className="p-8 space-y-4">
+        <div className="p-4 sm:p-8 space-y-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
               <i className="fa-solid fa-receipt"></i>
@@ -142,7 +142,7 @@ export const Step2Payment = ({
 
         </div>
         
-        <div className="bg-slate-50 px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
+        <div className="bg-slate-50 px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
           <div>
             <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Payable</span>
             <span className="text-3xl font-black text-brand-primary tracking-tight">₹{totalAmount}<span className="text-sm font-bold text-slate-400">.00</span></span>
@@ -155,27 +155,15 @@ export const Step2Payment = ({
       </div>
 
       {/* Final Action Buttons */}
-      <form onSubmit={onSubmit} className="space-y-6">
-        <div className="flex flex-row items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={onBack}
-            className="group flex items-center gap-2 px-4 sm:px-8 py-4 rounded-2xl bg-white border-2 border-brand-accent text-slate-400 font-black uppercase tracking-widest text-[10px] sm:text-xs hover:text-brand-primary transition-all duration-300 w-auto"
-          >
-            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors shrink-0">
-              <i className="fa-solid fa-arrow-left"></i>
-            </div>
-            <span className="truncate">{t("btnBack2")}</span>
-          </button>
-
+      <form onSubmit={onSubmit} className="space-y-8">
+        <div className="flex flex-col items-center">
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={isSubmitting || isFeeLoading || !!feeError}
-            className="flex-1 flex items-center justify-center gap-3 px-6 sm:px-10 py-4 sm:py-5 rounded-[2rem] bg-brand-primary text-white font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[10px] sm:text-xs shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110 transition-all duration-300 relative overflow-hidden group shrink-0 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+            className="w-full sm:w-auto min-w-[280px] flex items-center justify-center gap-3 px-10 py-5 rounded-[2rem] bg-brand-primary text-white font-black uppercase tracking-[0.2em] text-[10px] sm:text-xs shadow-xl shadow-brand-primary/20 border-2 border-brand-secondary hover:brightness-110 transition-all duration-300 relative overflow-hidden group disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed mb-6"
           >
-
             {isFeeLoading ? (
               <div className="flex items-center gap-2">
                 <div className="spinner !border-white !w-4 !h-4"></div>
@@ -187,8 +175,6 @@ export const Step2Payment = ({
                 <span>{currentLang === 'en' ? 'Processing...' : 'প্রসেসিং হচ্ছে...'}</span>
               </div>
             ) : (
-
-
               <>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]"></div>
                 <span>{t("btnPay")}</span>
@@ -196,6 +182,19 @@ export const Step2Payment = ({
               </>
             )}
           </motion.button>
+        </div>
+
+        <div className="flex justify-start">
+          <button
+            type="button"
+            onClick={onBack}
+            className="group flex items-center gap-2 px-4 sm:px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] sm:text-xs text-slate-400 hover:text-brand-primary transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand-primary/10 transition-colors shrink-0">
+              <i className="fa-solid fa-arrow-left"></i>
+            </div>
+            <span className="truncate">{t("btnBack2")}</span>
+          </button>
         </div>
 
         <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">

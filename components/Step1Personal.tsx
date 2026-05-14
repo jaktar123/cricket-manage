@@ -141,7 +141,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
           <h3 className="text-xl font-bold text-slate-900">{t("photoTitle")}</h3>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-10 bg-white p-8 rounded-[2.5rem] border-2 border-brand-secondary">
+        <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-10 bg-white p-4 sm:p-8 rounded-[2.5rem] border-2 border-brand-secondary">
           <div className="relative group">
             <div className={`w-48 h-48 rounded-[3rem] border-4 ${formData.photoUrl ? 'border-brand-primary' : 'border-slate-100'} shadow-2xl bg-slate-50 flex items-center justify-center overflow-hidden relative transition-all duration-500 group-hover:scale-105`}>
               {formData.photoUrl ? (
@@ -186,7 +186,7 @@ export const Step1Personal = ({ formData, setFormData, onContinue, onBack }: Pro
       </div>
 
       {/* Tournament Rules Section */}
-      <div className="p-8 rounded-[2rem] bg-[#FFF9F0] border-2 border-[#F3E5AB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.1)]">
+      <div className="p-4 sm:p-8 rounded-[2rem] bg-[#FFF9F0] border-2 border-[#F3E5AB] shadow-[inset_0_2px_4px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.1)]">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shadow-lg shadow-brand-primary/20">
             <i className="fa-solid fa-gavel text-white text-lg"></i>

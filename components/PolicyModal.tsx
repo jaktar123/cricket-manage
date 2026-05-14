@@ -13,7 +13,7 @@ export const PolicyModal = ({ onClose }: { onClose: () => void }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="glass-effect rounded-2xl shadow-2xl p-8 md:p-10 relative border border-slate-200 max-w-3xl w-full max-h-[90vh] overflow-y-auto cursor-default"
+        className="glass-effect rounded-2xl shadow-2xl p-4 sm:p-8 md:p-10 relative border border-slate-200 max-w-3xl w-full max-h-[90vh] overflow-y-auto cursor-default"
       >
         <h2 className="text-2xl md:text-3xl font-black text-slate-900 border-b-2 border-slate-100 pb-4 mb-6 flex items-center justify-between uppercase italic tracking-tight">
           <div className="flex items-center">
@@ -29,7 +29,7 @@ export const PolicyModal = ({ onClose }: { onClose: () => void }) => {
           </button>
         </h2>
 
-        <div className="text-sm text-slate-700 bg-white p-8 rounded-[2rem] border-2 border-brand-accent/20 space-y-6 shadow-inner">
+        <div className="text-sm text-slate-700 bg-white p-4 sm:p-8 rounded-[2rem] border-2 border-brand-accent/20 space-y-6 shadow-inner">
           {currentLang === "en" ? (
             <>
               <div className="flex items-start gap-4 p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
