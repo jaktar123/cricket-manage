@@ -32,39 +32,46 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
   const [feeStructure, setFeeStructure] = useState<{name: string, amount: number}[]>([]);
   const [isFeeLoading, setIsFeeLoading] = useState(true);
   const [feeError, setFeeError] = useState<string | null>(null);
+  const [isRegistrationDisabled, setIsRegistrationDisabled] = useState(false);
 
 
   useEffect(() => {
-    const fetchFee = async () => {
+    const fetchSettings = async () => {
       setIsFeeLoading(true);
       setFeeError(null);
       try {
         const { data, error } = await supabase
           .from('global_settings')
-          .select('value')
-          .ilike('key', 'registration_fee%')
-          .maybeSingle();
+          .select('key, value')
+          .in('key', ['registration_fee', 'registration_disabled']);
         
         if (error) throw error;
         
-        if (data) {
-          const parsed = JSON.parse(data.value);
+        const feeSetting = data?.find(s => s.key === 'registration_fee');
+        const disabledSetting = data?.find(s => s.key === 'registration_disabled');
+        
+        if (disabledSetting && disabledSetting.value === 'true') {
+          setIsRegistrationDisabled(true);
+        }
+        
+        if (feeSetting) {
+          const parsed = JSON.parse(feeSetting.value);
           if (Array.isArray(parsed)) {
             setFeeStructure(parsed);
           } else {
-            setFeeStructure([{ name: "Registration Fee", amount: parseInt(data.value) || 0 }]);
+            setFeeStructure([{ name: "Registration Fee", amount: parseInt(feeSetting.value) || 0 }]);
           }
         } else {
           throw new Error("Registration fee setting not found in database.");
         }
       } catch (err) {
-        console.error("Error fetching fee:", err);
-        setFeeError("Critical Error: Could not retrieve registration fee. Registration is disabled. Please contact admin.");
+        console.error("Error fetching settings:", err);
+        setFeeError("Critical Error: Could not retrieve registration configuration. Please contact admin.");
       } finally {
         setIsFeeLoading(false);
       }
     };
-    fetchFee();
+    fetchSettings();
   }, []);
 
 
@@ -242,138 +249,34 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
           <p className="text-blue-100/80 text-lg font-medium tracking-wide">Single Player Registration Portal</p>
         </motion.div>
 
-        {step === 1 && (
+        {isRegistrationDisabled ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="glass-effect rounded-[2.5rem] p-8 sm:p-12 md:p-16 border border-white/40 shadow-2xl relative overflow-hidden text-center text-white space-y-6 max-w-2xl mx-auto mb-20"
           >
-            {/* Consolidated Rules Container (Moved Outside) */}
-            <div className="bg-[#FAF9F6] border-2 border-[#EADBC8]/50 rounded-[2.5rem] p-4 sm:p-6 space-y-6 shadow-2xl premium-shadow relative overflow-hidden">
-              {/* Subtle texture overlay */}
-              <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-              
-              {/* Advisory Row */}
-              <div className="relative z-10 flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800">
-                <div className="shrink-0 w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center">
-                  <i className="fa-solid fa-circle-info text-lg"></i>
-                </div>
-                <p className="text-[11px] font-black uppercase tracking-tight leading-tight">
-                  Please read all rules and policies carefully before filling the form.
-                </p>
-              </div>
-
-              {/* Buttons Row */}
-              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setShowInfo(true)}
-                  className="p-4 rounded-2xl border-2 border-[#EADBC8] bg-white hover:bg-brand-primary/5 transition-all duration-300 flex items-center gap-4 cursor-pointer group shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shadow-sm group-hover:bg-brand-primary/20 transition-colors">
-                    <i className="fa-solid fa-list-check text-brand-primary text-lg"></i>
-                  </div>
-                  <div>
-                    <h4 className="font-black text-slate-900 tracking-tight uppercase text-[10px]">Form Fill-up rules</h4>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Important Guidelines</p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setShowPolicy(true)}
-                  className="p-4 rounded-2xl border-2 border-[#EADBC8] bg-white hover:bg-brand-primary/5 transition-all duration-300 flex items-center gap-4 cursor-pointer group shadow-sm"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shadow-sm group-hover:bg-brand-primary/20 transition-colors">
-                    <i className="fa-solid fa-shield-halved text-brand-primary text-lg"></i>
-                  </div>
-                  <div>
-                    <h4 className="font-black text-slate-900 tracking-tight uppercase text-[10px]">Auction Rules</h4>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Rules & Conduct</p>
-                  </div>
-                </motion.div>
-              </div>
+            {/* Pulsing Pause Icon */}
+            <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
+              <i className="fa-solid fa-circle-pause text-4xl text-amber-400 animate-pulse"></i>
             </div>
-          </motion.div>
-        )}
+            
+            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight italic">
+              Registration Paused
+            </h2>
+            <h3 className="text-lg sm:text-xl font-bold text-brand-secondary uppercase tracking-widest mt-1">
+              রেজিস্ট্রেশন সাময়িকভাবে বন্ধ আছে
+            </h3>
+            
+            <p className="text-blue-100/80 leading-relaxed text-sm sm:text-base max-w-md mx-auto">
+              The player registration phase for Jugore Triple L 2026 is currently paused. Please check back later or contact organizers for assistance.
+            </p>
+            
+            <div className="w-16 h-1 bg-amber-500 mx-auto rounded-full"></div>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="glass-effect rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden relative border border-white/40 mb-20"
-        >
-          {/* Progress Bar */}
-          <div className="h-1.5 bg-white/10 w-full flex relative z-10">
-            <motion.div
-              initial={{ width: `${(step / 3) * 100}%` }}
-              animate={{ width: `${(step / 3) * 100}%` }}
-              transition={{ duration: 0.8, ease: "circOut" }}
-              className="h-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-primary bg-[length:200%_100%] animate-gradient"
-            ></motion.div>
-          </div>
-
-          <div className="p-4 sm:p-8 md:p-12 relative z-10 pt-10 sm:pt-16">
-            <AnimatePresence mode="wait">
-              {step === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Step1Personal
-                    formData={formData}
-                    setFormData={setFormData}
-                    onContinue={handleContinue}
-                    onBack={handleBack}
-                  />
-                </motion.div>
-              )}
-              {step === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Step2Kit
-                    formData={formData}
-                    setFormData={setFormData}
-                    onContinue={handleContinue}
-                    onBack={handleBack}
-                  />
-                </motion.div>
-              )}
-              {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4 }}
-                >
-                   <Step2Payment
-                    formData={formData}
-                    onBack={handleBack}
-                    onSubmit={handleSubmit}
-                    isSubmitting={isSubmitting}
-                    feeStructure={feeStructure}
-                    totalAmount={totalFeeAmount}
-                    isFeeLoading={isFeeLoading}
-                    feeError={feeError}
-                  />
-
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Global WhatsApp Support Section */}
-            <div className="mt-12 pt-10 border-t border-slate-100/50 flex flex-col items-center gap-4">
+            {/* WhatsApp Support */}
+            <div className="pt-6 flex flex-col items-center gap-4">
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                {t("helpTitle")}
+                Have questions? Contact support
               </p>
               <motion.a
                 whileHover={{ scale: 1.05 }}
@@ -384,11 +287,160 @@ export const RegistrationForm = ({ onBackToIntro }: Props) => {
                 className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-[#25D366]/20 group"
               >
                 <i className="fa-brands fa-whatsapp text-lg group-hover:rotate-12 transition-transform"></i>
-                <span>{t("btnChat")}</span>
+                <span>Chat with Organizers</span>
               </motion.a>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        ) : (
+          <>
+            {step === 1 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+              >
+                {/* Consolidated Rules Container (Moved Outside) */}
+                <div className="bg-[#FAF9F6] border-2 border-[#EADBC8]/50 rounded-[2.5rem] p-4 sm:p-6 space-y-6 shadow-2xl premium-shadow relative overflow-hidden">
+                  {/* Subtle texture overlay */}
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                  
+                  {/* Advisory Row */}
+                  <div className="relative z-10 flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800">
+                    <div className="shrink-0 w-8 h-8 rounded-lg bg-amber-400/20 flex items-center justify-center">
+                      <i className="fa-solid fa-circle-info text-lg"></i>
+                    </div>
+                    <p className="text-[11px] font-black uppercase tracking-tight leading-tight">
+                      Please read all rules and policies carefully before filling the form.
+                    </p>
+                  </div>
+
+                  {/* Buttons Row */}
+                  <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => setShowInfo(true)}
+                      className="p-4 rounded-2xl border-2 border-[#EADBC8] bg-white hover:bg-brand-primary/5 transition-all duration-300 flex items-center gap-4 cursor-pointer group shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shadow-sm group-hover:bg-brand-primary/20 transition-colors">
+                        <i className="fa-solid fa-list-check text-brand-primary text-lg"></i>
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-900 tracking-tight uppercase text-[10px]">Form Fill-up rules</h4>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Important Guidelines</p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      onClick={() => setShowPolicy(true)}
+                      className="p-4 rounded-2xl border-2 border-[#EADBC8] bg-white hover:bg-brand-primary/5 transition-all duration-300 flex items-center gap-4 cursor-pointer group shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shadow-sm group-hover:bg-brand-primary/20 transition-colors">
+                        <i className="fa-solid fa-shield-halved text-brand-primary text-lg"></i>
+                      </div>
+                      <div>
+                        <h4 className="font-black text-slate-900 tracking-tight uppercase text-[10px]">Auction Rules</h4>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Rules & Conduct</p>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="glass-effect rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden relative border border-white/40 mb-20"
+            >
+              {/* Progress Bar */}
+              <div className="h-1.5 bg-white/10 w-full flex relative z-10">
+                <motion.div
+                  initial={{ width: `${(step / 3) * 100}%` }}
+                  animate={{ width: `${(step / 3) * 100}%` }}
+                  transition={{ duration: 0.8, ease: "circOut" }}
+                  className="h-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-primary bg-[length:200%_100%] animate-gradient"
+                ></motion.div>
+              </div>
+
+              <div className="p-4 sm:p-8 md:p-12 relative z-10 pt-10 sm:pt-16">
+                <AnimatePresence mode="wait">
+                  {step === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <Step1Personal
+                        formData={formData}
+                        setFormData={setFormData}
+                        onContinue={handleContinue}
+                        onBack={handleBack}
+                      />
+                    </motion.div>
+                  )}
+                  {step === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <Step2Kit
+                        formData={formData}
+                        setFormData={setFormData}
+                        onContinue={handleContinue}
+                        onBack={handleBack}
+                      />
+                    </motion.div>
+                  )}
+                  {step === 3 && (
+                    <motion.div
+                      key="step3"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                       <Step2Payment
+                        formData={formData}
+                        onBack={handleBack}
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        feeStructure={feeStructure}
+                        totalAmount={totalFeeAmount}
+                        isFeeLoading={isFeeLoading}
+                        feeError={feeError}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Global WhatsApp Support Section */}
+                <div className="mt-12 pt-10 border-t border-slate-100/50 flex flex-col items-center gap-4">
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                    {t("helpTitle")}
+                  </p>
+                  <motion.a
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    href="https://wa.me/919907434605"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 bg-[#25D366] text-white px-8 py-4 rounded-2xl transition-all duration-300 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-[#25D366]/20 group"
+                  >
+                    <i className="fa-brands fa-whatsapp text-lg group-hover:rotate-12 transition-transform"></i>
+                    <span>{t("btnChat")}</span>
+                  </motion.a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
 
         {/* Modals */}
         <AnimatePresence>

@@ -1,6 +1,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import FeeSettings from '@/components/admin/FeeSettings'
+import RegistrationToggle from '@/components/admin/RegistrationToggle'
 
 export default async function ConfigPage() {
   const supabase = await createClient()
@@ -10,7 +11,14 @@ export default async function ConfigPage() {
     .from('global_settings')
     .select('value')
     .eq('key', 'registration_fee')
-    .single();
+    .maybeSingle();
+
+  // Fetch registration disabled state
+  const { data: disabledData } = await supabase
+    .from('global_settings')
+    .select('value')
+    .eq('key', 'registration_disabled')
+    .maybeSingle();
 
   return (
     <div className="space-y-10">
@@ -21,6 +29,7 @@ export default async function ConfigPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-8">
+          <RegistrationToggle initialValue={disabledData?.value || "false"} />
           <FeeSettings initialValue={feeData?.value || "100"} />
           
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">

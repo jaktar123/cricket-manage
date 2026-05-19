@@ -4,16 +4,35 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlobalFooter } from "./GlobalFooter";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 export const IntroScreen = () => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [isRegistrationDisabled, setIsRegistrationDisabled] = useState(false);
 
   useEffect(() => {
     // Fade in intro page
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 100);
+
+    const checkRegistrationStatus = async () => {
+      try {
+        const { data } = await supabase
+          .from('global_settings')
+          .select('value')
+          .eq('key', 'registration_disabled')
+          .maybeSingle();
+        
+        if (data && data.value === 'true') {
+          setIsRegistrationDisabled(true);
+        }
+      } catch (err) {
+        console.error("Error checking registration status:", err);
+      }
+    };
+    checkRegistrationStatus();
 
     return () => clearTimeout(timer);
   }, []);
@@ -73,18 +92,32 @@ export const IntroScreen = () => {
         <div className="pt-8 flex flex-col items-center gap-4">
           <button
             onClick={() => router.push("/registration")}
-            className="group relative inline-flex items-center justify-center px-10 py-5 font-black text-slate-900 transition-all duration-300 bg-gradient-to-br from-white via-slate-50 to-slate-200 rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] border border-white/60 w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl"
+            className={`group relative inline-flex items-center justify-center px-10 py-5 font-black transition-all duration-300 rounded-full hover:scale-105 border w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl ${
+              isRegistrationDisabled
+                ? "bg-slate-800/80 hover:bg-slate-800 border-amber-500/50 text-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+                : "bg-gradient-to-br from-white via-slate-50 to-slate-200 text-slate-900 border-white/60 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+            }`}
           >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>
-            <span className="relative text-xl tracking-widest uppercase">Register Now</span>
+            {!isRegistrationDisabled && <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>}
+            {isRegistrationDisabled && <i className="fa-solid fa-circle-pause mr-3 text-lg animate-pulse"></i>}
+            <span className="relative text-xl tracking-widest uppercase">
+              {isRegistrationDisabled ? "Registration Paused" : "Register Now"}
+            </span>
           </button>
 
           <button
             onClick={() => router.push("/registration")}
-            className="group relative inline-flex items-center justify-center px-10 py-5 font-black text-slate-900 transition-all duration-300 bg-gradient-to-br from-white via-slate-50 to-slate-200 rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] border border-white/60 w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl"
+            className={`group relative inline-flex items-center justify-center px-10 py-5 font-black transition-all duration-300 rounded-full hover:scale-105 border w-full sm:w-auto min-w-[300px] overflow-hidden shadow-2xl ${
+              isRegistrationDisabled
+                ? "bg-slate-800/80 hover:bg-slate-800 border-amber-500/50 text-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+                : "bg-gradient-to-br from-white via-slate-50 to-slate-200 text-slate-900 border-white/60 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+            }`}
           >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>
-            <span className="relative text-xl">রেজিস্ট্রেশন করুন</span>
+            {!isRegistrationDisabled && <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out skew-x-12"></span>}
+            {isRegistrationDisabled && <i className="fa-solid fa-circle-pause mr-3 text-lg animate-pulse"></i>}
+            <span className="relative text-xl">
+              {isRegistrationDisabled ? "রেজিস্ট্রেশন সাময়িকভাবে বন্ধ" : "রেজিস্ট্রেশন করুন"}
+            </span>
           </button>
 
           <p className="mt-4 text-slate-400 text-xs uppercase tracking-widest font-bold">Join the ultimate cricket showdown!</p>

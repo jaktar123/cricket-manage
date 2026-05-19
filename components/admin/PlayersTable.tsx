@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { FaSearch, FaFilter, FaDownload, FaEdit, FaTrash, FaEye, FaSortAmountDown } from 'react-icons/fa'
 import Image from 'next/image'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import { autoTable } from 'jspdf-autotable'
 import { updatePlayer, deletePlayer } from '@/app/admin/actions'
 import { RegistrationData } from '@/lib/types'
 
@@ -90,97 +90,128 @@ export default function PlayersTable({ players: initialPlayers }: { players: Pla
 
   const exportToPDF = async (selectedColumns: string[]) => {
     setLoading(true)
-    const doc = new jsPDF()
-    
-    // Sort players by created_at ASCENDING for chronological serial numbers
-    const sortedPlayers = [...filteredPlayers].sort((a, b) => 
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    )
-    
-    // Add title
-    doc.setFontSize(18)
-    doc.text('Tournament Registrations', 14, 22)
-    doc.setFontSize(11)
-    doc.setTextColor(100)
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30)
-    doc.text(`Total Players: ${sortedPlayers.length}`, 14, 36)
-
-    // Load images if photo_url is selected
-    const imageMap: { [key: string]: string } = {}
-    if (selectedColumns.includes('photo_url')) {
-      await Promise.all(sortedPlayers.map(async (player) => {
-        if (player.photo_url) {
-          try {
-            const response = await fetch(player.photo_url)
-            const blob = await response.blob()
-            const base64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader()
-              reader.onloadend = () => resolve(reader.result as string)
-              reader.readAsDataURL(blob)
-            })
-            imageMap[player.photo_url] = base64
-          } catch (error) {
-            console.error('Failed to load image', player.photo_url, error)
-          }
-        }
-      }))
-    }
-    
-    const tableColumn = EXPORT_COLUMNS
-      .filter(col => selectedColumns.includes(col.key))
-      .map(col => col.label)
+    try {
+      const doc = new jsPDF()
       
-    const photoColIndex = EXPORT_COLUMNS
-      .filter(col => selectedColumns.includes(col.key))
-      .findIndex(col => col.key === 'photo_url')
+      // Sort players by created_at ASCENDING for chronological serial numbers
+      const sortedPlayers = [...filteredPlayers].sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
+      
+      // Add title
+      doc.setFontSize(18)
+      doc.text('Tournament Registrations', 14, 22)
+      doc.setFontSize(11)
+      doc.setTextColor(100)
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30)
+      doc.text(`Total Players: ${sortedPlayers.length}`, 14, 36)
 
-
-
-    const tableRows = sortedPlayers.map((player, index) => {
-      return EXPORT_COLUMNS
+      // Load images if photo_url is selected
+      const imageMap: { [key: string]: string } = {}
+      if (selectedColumns.includes('photo_url')) {
+        await Promise.all(sortedPlayers.map(async (player) => {
+          if (player.photo_url) {
+            try {
+              const response = await fetch(player.photo_url)
+              if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+              const blob = await response.blob()
+              
+              // Verify and convert image format to JPEG using canvas
+              const jpegBase64 = await new Promise<string>((resolve, reject) => {
+                const url = URL.createObjectURL(blob)
+                const img = new window.Image()
+                img.onload = () => {
+                  URL.revokeObjectURL(url)
+                  const canvas = document.createElement('canvas')
+                  canvas.width = img.width
+                  canvas.height = img.height
+                  const ctx = canvas.getContext('2d')
+                  if (ctx) {
+                    ctx.drawImage(img, 0, 0)
+                    try {
+                      const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95)
+                      resolve(jpegDataUrl)
+                    } catch (e) {
+                      reject(e)
+                    }
+                  } else {
+                    reject(new Error('Failed to get canvas context'))
+                  }
+                }
+                img.onerror = () => {
+                  URL.revokeObjectURL(url)
+                  reject(new Error('Failed to load image into canvas'))
+                }
+                img.src = url
+              })
+              
+              imageMap[player.photo_url] = jpegBase64
+            } catch (error) {
+              console.error('Failed to load image', player.photo_url, error)
+            }
+          }
+        }))
+      }
+      
+      const tableColumn = EXPORT_COLUMNS
         .filter(col => selectedColumns.includes(col.key))
-        .map(col => {
-          if (col.key === 'serial_no') {
-            return index + 1
-          }
-          if (col.key === 'created_at') {
-            return new Date(player.created_at).toLocaleDateString()
-          }
-          if (col.key === 'photo_url') {
-            return '' // Keep cell empty to prevent URL overflow
-          }
-          const val = player[col.key as keyof Player]
-          return val ?? '' // Fallback to empty string for autoTable
-        })
-    })
+        .map(col => col.label)
+        
+      const photoColIndex = EXPORT_COLUMNS
+        .filter(col => selectedColumns.includes(col.key))
+        .findIndex(col => col.key === 'photo_url')
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 45,
-      theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [241, 245, 249] },
-      margin: { top: 45 },
-      styles: { 
-        minCellHeight: selectedColumns.includes('photo_url') ? 35 : 10,
-        valign: 'middle'
-      },
-      columnStyles: photoColIndex !== -1 ? { [photoColIndex]: { cellWidth: 35 } } : {},
-      didDrawCell: (data) => {
-        if (photoColIndex !== -1 && data.column.index === photoColIndex && data.cell.section === 'body') {
-          const player = sortedPlayers[data.row.index]
-          if (player.photo_url && imageMap[player.photo_url]) {
-            // Further increased image size and centered it
-            doc.addImage(imageMap[player.photo_url], 'JPEG', data.cell.x + 2.5, data.cell.y + 2.5, 30, 30)
-          }
-        }
-      },
-    })
+      const tableRows = sortedPlayers.map((player, index) => {
+        return EXPORT_COLUMNS
+          .filter(col => selectedColumns.includes(col.key))
+          .map(col => {
+            if (col.key === 'serial_no') {
+              return index + 1
+            }
+            if (col.key === 'created_at') {
+              return new Date(player.created_at).toLocaleDateString()
+            }
+            if (col.key === 'photo_url') {
+              return '' // Keep cell empty to prevent URL overflow
+            }
+            const val = player[col.key as keyof Player]
+            return val ?? '' // Fallback to empty string for autoTable
+          })
+      })
 
-    doc.save(`players_export_${new Date().toISOString().split('T')[0]}.pdf`)
-    setIsExportModalOpen(false)
-    setLoading(false)
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 45,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [241, 245, 249] },
+        margin: { top: 45 },
+        styles: { 
+          minCellHeight: selectedColumns.includes('photo_url') ? 35 : 10,
+          valign: 'middle'
+        },
+        columnStyles: photoColIndex !== -1 ? { [photoColIndex]: { cellWidth: 35 } } : {},
+        didDrawCell: (data) => {
+          if (photoColIndex !== -1 && data.column.index === photoColIndex && data.cell.section === 'body') {
+            const player = sortedPlayers[data.row.index]
+            if (player && player.photo_url && imageMap[player.photo_url]) {
+              // Further increased image size and centered it
+              doc.addImage(imageMap[player.photo_url], 'JPEG', data.cell.x + 2.5, data.cell.y + 2.5, 30, 30)
+            }
+          }
+        },
+      })
+
+      doc.save(`players_export_${new Date().toISOString().split('T')[0]}.pdf`)
+      setIsExportModalOpen(false)
+    } catch (error) {
+      console.error('Failed to generate PDF:', error)
+      const message = error instanceof Error ? error.message : String(error)
+      alert('An error occurred while generating the PDF: ' + message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async (id: string) => {
